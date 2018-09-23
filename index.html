@@ -1,0 +1,1072 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="x-ua-compatible"  content="ie=9" charset=iso-8859-1" />
+<title>GenoART</title>
+<link rel="stylesheet" type="text/css" href="CSS/header2017.css"> 
+<link rel="stylesheet" type="text/css" href="CSS/round_borders.css">
+<link rel="stylesheet" type="text/css" href="CSS/inner_menu.css">
+
+<style >
+.button {
+    /*background-color: #fffffff;*/
+	/* #7c7fd8 : Blue && #323233 : Black && #797979 : Grey*/
+  
+    color: black;
+	border-color: black
+    padding: 8px 30px;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    font-size: 16px;
+
+}
+
+ select{
+ padding: 5px 10px;
+ border: 2px solid #c3c3c3;
+ border-radius:50px;
+ background-color: #fffffff
+ }
+ input{
+ padding: 5px 10px;
+ border: 2px solid #c3c3c3;
+ border-radius:50px;
+ background-color: #fffffff
+ }
+ 
+ nav {
+  margin: 50px;
+}
+</style>
+<!-- Colour picker starts-->
+<style>
+
+.thumbnail img {
+  display: block;
+  cursor: crosshair;
+  border: 5px solid #fff;
+  margin: 0 auto;
+}
+#cs{ 
+  display:none;
+}
+</style>
+<!-- Colour picker ends -->
+
+
+<script type="text/javascript" language="javascript">
+	//var relpath = window.location.pathname.replace(/\\/g,'/').split('/');
+    var relpath = window.location.href;
+    //var fullpath = relpath + path;
+	//relpath = relpath.join('/') + '/';
+	//alert(relpath);
+    //WshShell = new ActiveXObject("WScript.Shell");
+    //WshShell.Run(fullpath, 1, false);
+</script>	
+<script language="javascript">
+
+function Writedata()
+{
+	var app = require('electron').remote; 
+	var dialog = app.dialog;
+	var fs = require('fs');
+	
+	/*alert("Creating test.bat");
+	var filepath = "test.bat";
+	var content = "calc";
+
+	fs.writeFile(filepath, content, (err) => {
+		if (err) {
+			alert("An error ocurred updating the file" + err.message);
+			console.log(err);
+			return;
+		}
+		
+		alert("The file has been succesfully saved");
+		RunExe_nodeJS()
+	}); */
+		
+	//alert(1);
+	var cleavage = document.getElementsByName('mc');
+	var cleavage_value;
+	for(var i = 0; i < cleavage.length; i++){
+    if(cleavage[i].checked){
+			cleavage_value = cleavage[i].value;
+		}
+	}
+	"use strict";
+	// The path to the .bat file
+
+
+	var gtf_name = document.getElementById('gtf').value;
+	if( gtf_name ) {
+	
+		var filepath = "config.bat";
+		//var filepath = "test.bat";
+		//document.getElementById("myFile").files[0].path
+		
+		//var content = "perl writeNum.pl";
+		var content = "bin\\fetch_seq.exe"+" "+document.getElementById('genome').files[0].path+" "+document.getElementById('gtf').files[0].path+"\n"
+		+"perl "+"bin\\GenoART.pl "+ cleavage_value +" "+ document.getElementById('enzyme').value+" "+ document.getElementById('genome').files[0].path+" "+ document.getElementById('genetic_code').value+"\n"
+		+"bin\\s2s_db_creator.exe"+" "+document.getElementById('genome').files[0].path+"\n"; 
+		
+	//	var content = "bin\\fetch_seq.exe"+" "+document.getElementById('genome').files[0].path+" "+document.getElementById('gtf').files[0].path+"\n"
+		//+"bin\\perl.exe "+"bin\\GenoART.pl "+ cleavage_value +" "+ document.getElementById('enzyme').value+" "+ document.getElementById('genome').files[0].path+" "+ document.getElementById('genetic_code').value+"\n"
+		//+"bin\\s2s_db_creator.exe"+" "+document.getElementById('genome').files[0].path+"\n"; 
+
+		fs.writeFile(filepath, content, (err) => {
+		if (err) {
+			alert("An error ocurred updating the file" + err.message);
+			console.log(err);
+			return;
+		}
+		//alert("Your files are being processed in batch");
+		RunExe_nodeJS(filepath)
+		});
+		/*const spawn = require('child_process').spawn;
+		alert(filepath);
+		const bat = spawn('cmd.exe', ['/c', filepath]);
+		alert("Processed Complete!!!");*/
+	}
+	else
+	{
+		//s.WriteLine("bin\\fetch_seq.exe"+" "+document.getElementById('genome').value+" 0"+"\n"
+	//	+"bin\\perl.exe "+"bin\\GenoART.pl "+ cleavage_value +" "+ document.getElementById('enzyme').value+" "+ document.getElementById('genome').value+" "+ document.getElementById('genetic_code').value+"\n"
+	//	+"bin\\s2s_db_creator.exe"+" "+document.getElementById('genome').value+"\n");
+		//alert('No GTF/GFF provided, executing six-frame translation of genome\n\nThe data has been written to \n' + write_id);
+	//	s.Close();
+	//	RunExe()
+		//s.WriteLine("perl "+"categorization.pl "+document.getElementById('genome').value +" "+document.getElementById('gtf').value+"\n");
+	}
+}
+	function RunExe_nodeJS(myBatFilePath){
+		//var command = document.getElementById('cmd').value;
+		//var myBatFilePath = "test.bat";
+		
+		// #################### ANOTHER COMMAND START 100 ##################
+		
+		//alert(__dirname + "\\"+myBatFilePath);
+		require('child_process').exec( "start cmd /k " + __dirname + "\\"+myBatFilePath, function (err, stdout, stderr) {
+		if (err) {
+			// Ooops.
+			// console.log(stderr);
+			return console.log(err);
+		}
+		//alert(stdout);
+		// Done.
+		console.log(stdout);
+		});
+		
+		// #################### ANOTHER COMMAND END 100 ##################
+		/*
+		// #################### ANOTHER COMMAND START 222 ##################
+		var pwd = require('path').dirname(require.main.filename);
+		var execFileName = pwd+ "\\" + myBatFilePath;
+		alert(execFileName);
+		alert("The file is "+myBatFilePath);
+		const spawn = require('child_process').spawn;
+		alert(execFileName);
+		const bat = spawn('cmd.exe', ['/c', execFileName]);	
+		//const bat = spawn(execFileName);	
+		//alert(bat); 
+		
+		
+		// Handle normal output
+		bat.stdout.on('data', (data) => {
+			// As said before, convert the Uint8Array to a readable string.
+			var str = String.fromCharCode.apply(null, data);
+			alert(20);
+			console.info(str);
+		});
+
+		// Handle error output
+		bat.stderr.on('data', (data) => {
+			// As said before, convert the Uint8Array to a readable string.
+			var str = String.fromCharCode.apply(null, data);
+			alert(21);
+			console.error(str);
+			//alert(str);
+		});
+
+		// Handle on exit event
+		bat.on('exit', (code) => {
+			var preText = `Child exited with code ${code} : `;
+
+			switch(code){
+				case 0:
+					console.info(preText+"Something unknown happened executing the batch.");
+					break;
+				case 1:
+					console.info(preText+"The file already exists");
+					break;
+				case 2:
+					console.info(preText+"The file doesn't exists and now is created");
+					break;
+				case 3:
+					console.info(preText+"An error ocurred while creating the file");
+					break;
+			}
+		});
+				*/
+		// #################### ANOTHER COMMAND END 222 ##################
+	}
+	
+/*	
+
+}*/
+</script>
+<!--<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>-->
+<!-- Insert this line above script imports  -->
+<script>if (typeof module === 'object') {window.module = module; module = undefined;}</script>
+<script src="Scripts/query-min.js"></script>
+<!-- Insert this line after script imports -->
+<script>if (window.module) module = window.module;</script>
+<!-- <HTA:APPLICATION
+  APPLICATIONNAME="GenoART"
+  ID="ProteogenomicsGUI"
+  ICON="images/genoART_icon.ico"
+  SINGLEINSTANCE="yes"
+  VERSION="1.0"/> -->
+
+  
+<script>
+var introduction_flag = 0;
+var readme_flag = 0;
+var preparatory_flag = 0; 
+var revise_flag = 0; 
+var visualize_flag = 0;
+$(document).ready(function(){
+	introduction_flag = 1;
+     $("#introduction").show 
+	 $("#readme_js").hide();
+	 $("#preparatory_js").hide();
+	 $("#revise_js").hide();
+	 $("#visualise_js").hide();
+
+});
+
+$(document).ready(function(){
+    $("#introduction").click(function(){
+	    introduction_flag = 1;
+		readme_flag = 0;
+		preparatory_flag = 0;
+		revise_flag = 0; 
+		visualize_flag = 0;
+	    $("#introduction").show
+	
+	    $("#introduction_js").show();
+        $("#readme_js").hide();
+		$("#preparatory_js").hide();
+		$("#revise_js").hide();
+		$("#visualise_js").hide();
+    });
+});
+$(document).ready(function(){
+    $("#readme").click(function(){
+		introduction_flag = 0;
+		readme_flag = 1;
+		preparatory_flag = 0;
+		revise_flag = 0; 
+		visualize_flag = 0;
+	    
+		$("#introduction_js").hide();
+        $("#readme_js").show();		
+		$("#preparatory_js").hide();
+		$("#revise_js").hide();
+		$("#visualise_js").hide();		
+    });
+});
+
+$(document).ready(function(){
+    $("#preparatory").click(function(){
+		introduction_flag = 0;
+		readme_flag = 0;
+		preparatory_flag = 1;
+		revise_flag = 0; 
+		visualize_flag = 0;
+		
+        $("#introduction_js").hide();
+		$("#readme_js").hide();
+		$("#preparatory_js").show();
+		$("#revise_js").hide();
+		$("#visualise_js").hide();
+    });
+});	
+$(document).ready(function(){
+    $("#revise").click(function(){
+		introduction_flag = 0;
+		readme_flag = 0;
+		preparatory_flag = 0;
+		revise_flag = 1; 
+		visualize_flag = 0;
+
+        $("#introduction_js").hide();
+		$("#readme_js").hide();
+		$("#preparatory_js").hide();
+		$("#revise_js").show();
+		$("#visualise_js").hide();
+    });
+});	
+$(document).ready(function(){
+    $("#visualise").click(function(){
+		introduction_flag = 0;
+		readme_flag = 0;
+		preparatory_flag = 0;
+		revise_flag = 0; 
+		visualize_flag = 1;
+		
+        $("#introduction_js").hide();
+		$("#readme_js").hide();
+		$("#preparatory_js").hide();
+		$("#revise_js").hide();
+		$("#visualise_js").show();
+    });	
+	
+});
+
+$(document).ready(function(){
+  $('ul li a').click(function(){
+    $('li a').removeClass("active");
+    $(this).addClass("active");
+});
+});
+</script>  
+
+</head>
+
+<body bgcolor="#ece5f5">
+<!-- Colour picker starts-->
+
+
+<!-- Colour picker ends -->
+
+
+<div id="myDIV">
+<ul class="headertab">
+  <li><a id="introduction" class="active" class="width:70px" >Home</a></li>
+  <li><a id="readme" class="#"  >Read Me</a></li>
+  <li><a id="preparatory" class="#" >Customize</a></li>
+  <li><a id="revise" class="#"  >Analyze</a></li>
+  <li><a id="visualise" class="#" >Visualize</a></li>
+  <!-- <li style="float:right"></li> -->
+  <a href="about.html" target="_blank" ><img src="./images/ihp_icon_wc2.png" alt="Inhouse protocols" style="float:right; width:45px; margin-right: 10px;"></a>
+</ul>	
+
+</div>
+<h2 align="center"><em>GenoART: Genome Annotation and Refinement Tool</em></h2>
+<table height="69%" width="1298" id="border-radius" class="border-radius-example">
+
+<!--<tr  height="20" valign="top">
+   <td height="23" >&nbsp;</td>
+   <td colspan="2">&nbsp;</td>
+   <td>&nbsp;</td>
+ </tr> -->
+<tr valign="top">
+ 
+   <td width="3%" height="24" >&nbsp;</td>
+   <td colspan="2"> 
+ 
+
+<!-- ##############################################  Introduction  #################################### -->
+<div id="introduction_js">
+   <p align="justify" >
+   GenoART is a standalone application for detecting coding potential of transcripts complemented by experimentally derived proteomics (MS/MS) data. GenoART will make use of Python, PERL and javascripts for processing your input genome and create a custom database for proteogenomic searches. A detailed protocol is available online. 
+   In simple terms, the custom database generated by this application can be used as a reference protein database and search the unmatched/unassigned spectra in any search engines such as Mascot, SEQUEST, X! Tandem or Andromeda.  
+   GenoART can be queried to categorize and browse these resultant peptides at the click of a button. The peptides will include the genomic coordinates which allows user to navigate to UCSC genome browser which can facilitate more details about the gene/transcript and can be compaired with predicted genes, Expressed sequence Tag (EST), and perform comparitive genomics for more evidence. 
+   A GTF (Gene Transfer Format) will be available to download upon querying, which can later be viewed in any genome visualizer such as UCSC or IGV to compare accross different studies.</p>
+   <script>
+	function bcimage(){
+		if(document.getElementById('bci').style.visibility=="hidden")
+			document.getElementById('bci').style.visibility = 'visible';
+		else
+			document.getElementById('bci').style.visibility = 'hidden';
+	}
+   </script>
+	<p align="center"><img src="images/GenoART_tool.jpg" alt="GenoART" style="width:1000px;height:450px;" ></p><br />
+	<img src="./images/Chemelon5.png" alt="Inhouse protocols" style="float:right; width:60px; margin-right: 2 px;" onclick="bcimage()">
+		<p class="thumbnail" align="center"><img src="./images/ihp_icon_wc2.png" id="bci" alt="Inhouse protocols" style="float:right;visibility:hidden; width:45px; margin-right: 10px;"></p>
+	<!--<p class="thumbnail" align="center"><img src="images/GenoART_tool_naked_lessDPI.png" alt="GenoART" style="width:1000px;height:450px;"></p><br />-->
+	<canvas id="cs"></canvas>
+	<script>
+// vars
+var img = _('.thumbnail img'),
+    canvas = _('#cs'),
+    result = _('.result'),
+    preview = _('.preview'),x = '',y = '';
+
+// click function
+img.addEventListener('click', function(e){
+  // chrome
+  if(e.offsetX) {
+    x = e.offsetX;
+    y = e.offsetY; 
+  }
+  // firefox
+  else if(e.layerX) {
+    x = e.layerX;
+    y = e.layerY;
+  }
+  useCanvas(canvas,img,function(){
+    // get image data
+    var p = canvas.getContext('2d')
+    .getImageData(x, y, 1, 1).data;
+    // show info
+    //result.innerHTML = '<span>HEX: '+rgbToHex(p[0],p[1],p[2])+'</span>'+
+     '<span>RGB:  rgb('+
+      p[0]+','+
+      p[1]+','+
+      p[2]+')</span>';
+    
+    // add background in body
+    document.body.style.background =rgbToHex(p[0],p[1],p[2]);
+  });
+},false);
+
+// preview function mousemove
+img.addEventListener('mousemove', function(e){
+  // chrome
+  if(e.offsetX) {
+    x = e.offsetX;
+    y = e.offsetY; 
+  }
+  // firefox
+  else if(e.layerX) {
+    x = e.layerX;
+    y = e.layerY;
+  }
+  
+  useCanvas(canvas,img,function(){
+    
+    // get image data
+    var p = canvas.getContext('2d')
+    .getImageData(x, y, 1, 1).data;
+    // show preview color
+    preview.style.background = rgbToHex(p[0],p[1],p[2]);
+  });
+},false);
+
+
+// canvas function
+function useCanvas(el,image,callback){
+  el.width = image.width; // img width
+  el.height = image.height; // img height
+  // draw image in canvas tag
+  el.getContext('2d')
+  .drawImage(image, 0, 0, image.width, image.height);
+  return callback();
+}
+// short querySelector
+function _(el){
+  return document.querySelector(el);
+};
+
+// convert rgba to hex 
+// http://stackoverflow.com/questions/5623838/rgb-to-hex-and-hex-to-rgb
+function componentToHex(c) {
+  var hex = c.toString(16);
+  return hex.length == 1 ? "0" + hex : hex;
+}
+function rgbToHex(r, g, b) {
+  return "#" + componentToHex(r) + componentToHex(g) + componentToHex(b);
+}
+
+function findPos(obj) {
+    var curleft = 0, curtop = 0;
+    if (obj.offsetParent) {
+        do {
+            curleft += obj.offsetLeft;
+            curtop += obj.offsetTop;
+        } while (obj = obj.offsetParent);
+        return { x: curleft, y: curtop };
+    }
+    return undefined;
+}
+</script>
+<script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'UA-46156385-1', 'cssscript.com');
+  ga('send', 'pageview');
+
+</script>
+	
+	
+<br>
+</div>
+<!-- ##############################################  Read me  #################################### -->
+
+<div id="readme_js">	
+<a style="font-family:Helvetica;font-weight: bold;">Read me</b></a>
+<p align="justify" >In the preparatory analysis, the peptides provided by the user is filtered with the known reference database and remove ambiguous peptides introduced by isobaric ions. A tab delimited text file should be provided as input, where the first column should be peptide sequence. The preparatory analysis yields two files: one mapping to reference proteins and one that doesn't map, and they are named as ProteinCoding and GSSPs respectively. </br></br>NOTE: The file name should not contain special characters or spaces. Please find a sample input file for reference.</p>
+
+<script>
+	function bcimage2(){
+		if(document.getElementById('bci2').style.visibility=="hidden")
+			document.getElementById('bci2').style.visibility = 'visible';
+		else
+			document.getElementById('bci2').style.visibility = 'hidden';
+	}
+   </script>
+ <img src="./images/Chemelon5.png" alt="Inhouse protocols" style="float:right; width:60px; margin-right: 2 px;" onclick="bcimage2()">
+ 
+ <p class="thumbnail" align="center"><img src="./images/ihp_icon_wc2.png" id="bci2" alt="Inhouse protocols" style="float:right;visibility:hidden; width:45px; margin-right: 10px;"></p>
+	<!--<p class="thumbnail" align="center"><img src="images/GenoART_tool_naked_lessDPI.png" alt="GenoART" style="width:1000px;height:450px;"></p><br />-->
+	<canvas id="cs"></canvas>
+	<script>
+// vars
+var img = _('.thumbnail img'),
+    canvas = _('#cs'),
+    result = _('.result'),
+    preview = _('.preview'),x = '',y = '';
+
+// click function
+img.addEventListener('click', function(e){
+  // chrome
+  if(e.offsetX) {
+    x = e.offsetX;
+    y = e.offsetY; 
+  }
+  // firefox
+  else if(e.layerX) {
+    x = e.layerX;
+    y = e.layerY;
+  }
+  useCanvas(canvas,img,function(){
+    // get image data
+    var p = canvas.getContext('2d')
+    .getImageData(x, y, 1, 1).data;
+    // show info
+    //result.innerHTML = '<span>HEX: '+rgbToHex(p[0],p[1],p[2])+'</span>'+
+     '<span>RGB:  rgb('+
+      p[0]+','+
+      p[1]+','+
+      p[2]+')</span>';
+    
+    // add background in body
+    document.body.style.background =rgbToHex(p[0],p[1],p[2]);
+  });
+},false);
+
+// preview function mousemove
+img.addEventListener('mousemove', function(e){
+  // chrome
+  if(e.offsetX) {
+    x = e.offsetX;
+    y = e.offsetY; 
+  }
+  // firefox
+  else if(e.layerX) {
+    x = e.layerX;
+    y = e.layerY;
+  }
+  
+  useCanvas(canvas,img,function(){
+    
+    // get image data
+    var p = canvas.getContext('2d')
+    .getImageData(x, y, 1, 1).data;
+    // show preview color
+    preview.style.background = rgbToHex(p[0],p[1],p[2]);
+  });
+},false);
+
+
+// canvas function
+function useCanvas(el,image,callback){
+  el.width = image.width; // img width
+  el.height = image.height; // img height
+  // draw image in canvas tag
+  el.getContext('2d')
+  .drawImage(image, 0, 0, image.width, image.height);
+  return callback();
+}
+// short querySelector
+function _(el){
+  return document.querySelector(el);
+};
+
+// convert rgba to hex 
+// http://stackoverflow.com/questions/5623838/rgb-to-hex-and-hex-to-rgb
+function componentToHex(c) {
+  var hex = c.toString(16);
+  return hex.length == 1 ? "0" + hex : hex;
+}
+function rgbToHex(r, g, b) {
+  return "#" + componentToHex(r) + componentToHex(g) + componentToHex(b);
+}
+
+function findPos(obj) {
+    var curleft = 0, curtop = 0;
+    if (obj.offsetParent) {
+        do {
+            curleft += obj.offsetLeft;
+            curtop += obj.offsetTop;
+        } while (obj = obj.offsetParent);
+        return { x: curleft, y: curtop };
+    }
+    return undefined;
+}
+</script>
+<script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'UA-46156385-1', 'cssscript.com');
+  ga('send', 'pageview');
+
+</script>
+ 
+<!-- <p><em><strong>Preparatory or Preliminary analysis:</strong></em></p> 	-->
+<!--<form action="ihp_proteogenomics_analysis.php"  target="_blank" method="post" enctype="multipart/form-data"> -->
+	<br>	 
+	<br/>
+	
+</div>	
+	
+<!-- ##############################################  Preparatory  #################################### -->
+	
+	
+<div id="preparatory_js">	
+<a  style="font-family:Helvetica;font-weight: bold;">Customize</a><br>
+
+
+     <!--<p><em><strong>Analyze genome search-specific peptides:</strong></em></p> 	-->
+<!--<form action="ihp_proteogenomics_analysis.php"  target="_blank" method="post" enctype="multipart/form-data"> -->
+<form action=""  method="post" enctype="multipart/form-data">  
+<p align="justify" ><em>Evidence-Based Annotation of peptides: </em>In the evidence-based annotation, you will need to provide the annotated GTF/GFF for fetching sequence from the genome and translate in to 3 frames. However, if you do not have 
+a GTF/GFF file you can select "No evidence" below. If on the other hand you would like to translate the genome in six frames and use the GTF/GFF file for categorization, then choose "Prokaryotes". Note:The file name should <b>NOT</b> contain special characters or spaces.</p>
+          <div id="subheader" align="left">Choose the parameters: 
+	    <br>	 
+		<br/>		  
+			Select the digestive enzyme: 
+            <select id="enzyme">
+			<option selected="selected" value="trypsin">Trypsin</option>
+			<option value="chymotrypsin">Chymotrypsin</option>
+			<option value="argC">Arg-C</option>
+			<option value="lysC">Lys-C</option>
+			<option value="lysN">Lys-N</option>
+			<option value="aspN">Asp-N</option>
+			<option value="gluC">Glu-C</option>
+            </select>
+            <br />
+            <br />          
+			Select number of missed cleavages (Mc):
+			<input type="radio" checked="checked" name="mc" value="0"> 0 Mc
+			<input type="radio" name="mc" value="1"> 1 Mc
+			<input type="radio" name="mc" value="2"> 2 Mc<br/><br/>
+         Genome:&nbsp;&nbsp;	
+            <input type="file" name="genome" id="genome" required>
+            <br /><br/>
+		GTF/GFF:
+            <input type="file" name="gtf" id="gtf">
+           <!-- <input type="submit" class="button" name="genome" value="Add">
+            <input type="reset" class="button" name = "reset" value="Reset"> -->
+            <br /><br />
+		<em>(Perform six frame translation of genome when GTF/GFF is not provided)</em><br> 
+				
+	<br>Select the genetic code for your organism:
+			<select id="genetic_code">
+			<option selected="selected" value="t_t1.txt">The Standard Code</option>
+			<option value="t_t2.txt">The Vertebrate Mitochondrial Code</option>
+			<option value="t_t3.txt">The Yeast Mitochondrial Code</option>
+			<option value="t_t4.txt">The Mold, Protozoan, and Coelenterate Mitochondrial Code and the Mycoplasma/Spiroplasma Code</option>
+			<option value="t_t5.txt">The Invertebrate Mitochondrial Code</option>
+			<option value="t_t6.txt">The Ciliate, Dasycladacean and Hexamita Nuclear Code</option>
+			<option value="t_t9.txt">The Echinoderm and Flatworm Mitochondrial Code</option>
+			<option value="t_t10.txt">The Euplotid Nuclear Code</option>
+			<option value="t_t11.txt">The Bacterial, Archaeal and Plant Plastid Code</option>
+			<option value="t_t12.txt">The Alternative Yeast Nuclear Code</option>
+			<option value="t_t13.txt">The Ascidian Mitochondrial Code</option>
+			<option value="t_t14.txt">The Alternative Flatworm Mitochondrial Code</option>
+			<option value="t_t16.txt">Chlorophycean Mitochondrial Code</option>
+			<option value="t_t21.txt">Trematode Mitochondrial Code</option>
+			<option value="t_t22.txt">Scenedesmus obliquus Mitochondrial Code</option>
+			<option value="t_t23.txt">Thraustochytrium Mitochondrial Code</option>
+			<option value="t_t24.txt">Pterobranchia Mitochondrial Code</option>
+			<option value="t_t25.txt">Candidate Division SR1 and Gracilibacteria Code</option>
+			<option value="t_t26.txt">Pachysolen tannophilus Nuclear Code</option>
+			<option value="t_t27.txt">Karyorelict Nuclear</option>
+			<option value="t_t28.txt">Condylostoma Nuclear</option>
+			<option value="t_t29.txt">Mesodinium Nuclear</option>
+			<option value="t_t30.txt">Peritrich Nuclear</option>
+			<option value="t_t31.txt">Blastocrithidia Nuclear</option>
+			</select><br>
+     (<em> Source: <a href="https://www.ncbi.nlm.nih.gov/Taxonomy/Utils/wprintgc.cgi" target="_blank">NCBI</a> </em>)        
+	</div><br>
+	<p align="left">Create custom database:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+	<input type="button" value="Submit " onClick="Writedata()";>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<input type="reset" value="  Reset  "></p>
+     </form>
+<img src="./images/Chemelon5.png" alt="Inhouse protocols" style="float:right; width:60px; margin-right: 2 px;" onclick="bcimage()">
+<p class="thumbnail" align="center"><img src="./images/ihp_icon_wc2.png" id="bci" alt="Inhouse protocols" style="float:right;visibility:hidden; width:45px; margin-right: 10px;"></p>
+	<!--<p class="thumbnail" align="center"><img src="images/GenoART_tool_naked_lessDPI.png" alt="GenoART" style="width:1000px;height:450px;"></p><br />-->
+	<canvas id="cs"></canvas>
+	<script>
+// vars
+var img = _('.thumbnail img'),
+    canvas = _('#cs'),
+    result = _('.result'),
+    preview = _('.preview'),x = '',y = '';
+
+// click function
+img.addEventListener('click', function(e){
+  // chrome
+  if(e.offsetX) {
+    x = e.offsetX;
+    y = e.offsetY; 
+  }
+  // firefox
+  else if(e.layerX) {
+    x = e.layerX;
+    y = e.layerY;
+  }
+  useCanvas(canvas,img,function(){
+    // get image data
+    var p = canvas.getContext('2d')
+    .getImageData(x, y, 1, 1).data;
+    // show info
+    //result.innerHTML = '<span>HEX: '+rgbToHex(p[0],p[1],p[2])+'</span>'+
+     '<span>RGB:  rgb('+
+      p[0]+','+
+      p[1]+','+
+      p[2]+')</span>';
+    
+    // add background in body
+    document.body.style.background =rgbToHex(p[0],p[1],p[2]);
+  });
+},false);
+
+// preview function mousemove
+img.addEventListener('mousemove', function(e){
+  // chrome
+  if(e.offsetX) {
+    x = e.offsetX;
+    y = e.offsetY; 
+  }
+  // firefox
+  else if(e.layerX) {
+    x = e.layerX;
+    y = e.layerY;
+  }
+  
+  useCanvas(canvas,img,function(){
+    
+    // get image data
+    var p = canvas.getContext('2d')
+    .getImageData(x, y, 1, 1).data;
+    // show preview color
+    preview.style.background = rgbToHex(p[0],p[1],p[2]);
+  });
+},false);
+
+
+// canvas function
+function useCanvas(el,image,callback){
+  el.width = image.width; // img width
+  el.height = image.height; // img height
+  // draw image in canvas tag
+  el.getContext('2d')
+  .drawImage(image, 0, 0, image.width, image.height);
+  return callback();
+}
+// short querySelector
+function _(el){
+  return document.querySelector(el);
+};
+
+// convert rgba to hex 
+// http://stackoverflow.com/questions/5623838/rgb-to-hex-and-hex-to-rgb
+function componentToHex(c) {
+  var hex = c.toString(16);
+  return hex.length == 1 ? "0" + hex : hex;
+}
+function rgbToHex(r, g, b) {
+  return "#" + componentToHex(r) + componentToHex(g) + componentToHex(b);
+}
+
+function findPos(obj) {
+    var curleft = 0, curtop = 0;
+    if (obj.offsetParent) {
+        do {
+            curleft += obj.offsetLeft;
+            curtop += obj.offsetTop;
+        } while (obj = obj.offsetParent);
+        return { x: curleft, y: curtop };
+    }
+    return undefined;
+}
+</script>
+<script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'UA-46156385-1', 'cssscript.com');
+  ga('send', 'pageview');
+
+</script>
+</div>    
+	
+		
+<!-- ##############################################  Revise  ####################################-->
+
+<div id="revise_js">	 
+<a style="font-family:Helvetica;font-weight: bold;">Analyze</a>    
+	 <form action="ihp_proteogenomics_analysis.php" target="_blank"  method="post" enctype="multipart/form-data"> 
+<p align="justify" >The GSSPs obtained from the preparatory analysis should be provided as input. If you have already performed the preparatory analysis in a different method, you can just load in the list of peptides in this analysis. However, the input should remain as a tab delimited text file, where the first column is peptide sequence. These peptides will be queried against the GenoART database and the results are tabulated in an user friendly browser interface. The results can also be downloaded for further analysis.</br></br>NOTE: The file name should not contain special characters or spaces. Please find a sample input file for reference.</p>
+          <div id="subheader" align="left">Upload GSSP file for categorization: 
+            <br />
+            <br />
+         Custom annotation (GTF):&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<input type="file" name="custom_gtf" id="custom_gtf"><br><br>
+		 Reference Protien (FASTA):&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <input type="file" name="ref_cds" id="ref_cds"><br><br>
+		 Reference annotation (GTF):&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <input type="file" name="ref_gtf" id="ref_gtf"><br><br>
+		 Query peptides (TXT):&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<input type="file" name="gssps_txt" id="gssps_txt"><br><br>
+		<p align="left">Localize and categorize the peptides:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+		<input type="button" value="Submit " onClick="WriteDataToAnalyze()";>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<input type="reset" value="  Reset  "></p>
+            <br />
+	</div>
+      </form><br /> 
+	  <img src="./images/Chemelon5.png" alt="Inhouse protocols" style="float:right; width:60px; margin-right: 2 px;" onclick="bcimage()">
+	  <p class="thumbnail" align="center"><img src="./images/ihp_icon_wc2.png" id="bci" alt="Inhouse protocols" style="float:right;visibility:hidden; width:45px; margin-right: 10px;"></p>
+	<!--<p class="thumbnail" align="center"><img src="images/GenoART_tool_naked_lessDPI.png" alt="GenoART" style="width:1000px;height:450px;"></p><br />-->
+	<canvas id="cs"></canvas>
+	<script>
+// vars
+var img = _('.thumbnail img'),
+    canvas = _('#cs'),
+    result = _('.result'),
+    preview = _('.preview'),x = '',y = '';
+
+// click function
+img.addEventListener('click', function(e){
+  // chrome
+  if(e.offsetX) {
+    x = e.offsetX;
+    y = e.offsetY; 
+  }
+  // firefox
+  else if(e.layerX) {
+    x = e.layerX;
+    y = e.layerY;
+  }
+  useCanvas(canvas,img,function(){
+    // get image data
+    var p = canvas.getContext('2d')
+    .getImageData(x, y, 1, 1).data;
+    // show info
+    //result.innerHTML = '<span>HEX: '+rgbToHex(p[0],p[1],p[2])+'</span>'+
+     '<span>RGB:  rgb('+
+      p[0]+','+
+      p[1]+','+
+      p[2]+')</span>';
+    
+    // add background in body
+    document.body.style.background =rgbToHex(p[0],p[1],p[2]);
+  });
+},false);
+
+// preview function mousemove
+img.addEventListener('mousemove', function(e){
+  // chrome
+  if(e.offsetX) {
+    x = e.offsetX;
+    y = e.offsetY; 
+  }
+  // firefox
+  else if(e.layerX) {
+    x = e.layerX;
+    y = e.layerY;
+  }
+  
+  useCanvas(canvas,img,function(){
+    
+    // get image data
+    var p = canvas.getContext('2d')
+    .getImageData(x, y, 1, 1).data;
+    // show preview color
+    preview.style.background = rgbToHex(p[0],p[1],p[2]);
+  });
+},false);
+
+
+// canvas function
+function useCanvas(el,image,callback){
+  el.width = image.width; // img width
+  el.height = image.height; // img height
+  // draw image in canvas tag
+  el.getContext('2d')
+  .drawImage(image, 0, 0, image.width, image.height);
+  return callback();
+}
+// short querySelector
+function _(el){
+  return document.querySelector(el);
+};
+
+// convert rgba to hex 
+// http://stackoverflow.com/questions/5623838/rgb-to-hex-and-hex-to-rgb
+function componentToHex(c) {
+  var hex = c.toString(16);
+  return hex.length == 1 ? "0" + hex : hex;
+}
+function rgbToHex(r, g, b) {
+  return "#" + componentToHex(r) + componentToHex(g) + componentToHex(b);
+}
+
+function findPos(obj) {
+    var curleft = 0, curtop = 0;
+    if (obj.offsetParent) {
+        do {
+            curleft += obj.offsetLeft;
+            curtop += obj.offsetTop;
+        } while (obj = obj.offsetParent);
+        return { x: curleft, y: curtop };
+    }
+    return undefined;
+}
+</script>
+<script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'UA-46156385-1', 'cssscript.com');
+  ga('send', 'pageview');
+
+</script>
+</div>	  
+
+
+<!-- ##############################################  Visualize  #################################### -->
+
+<div id="visualise_js">	  
+<!-- <a  style="font-family:Helvetica;font-weight: bold;">Visualize: igv</a>    -->
+	  <img src="./images/Chemelon5.png" alt="Inhouse protocols" style="float:right; width:60px; margin-right: 2 px;" onclick="bcimage()">
+	  <p class="thumbnail" align="center"><img src="./images/ihp_icon_wc2.png" id="bci" alt="Inhouse protocols" style="float:right;visibility:hidden; width:45px; margin-right: 10px;"></p>
+	<!--<p class="thumbnail" align="center"><img src="images/GenoART_tool_naked_lessDPI.png" alt="GenoART" style="width:1000px;height:450px;"></p><br />-->
+	<canvas id="cs"></canvas>
+	<script>
+// vars
+var img = _('.thumbnail img'),
+    canvas = _('#cs'),
+    result = _('.result'),
+    preview = _('.preview'),x = '',y = '';
+
+// click function
+img.addEventListener('click', function(e){
+  // chrome
+  if(e.offsetX) {
+    x = e.offsetX;
+    y = e.offsetY; 
+  }
+  // firefox
+  else if(e.layerX) {
+    x = e.layerX;
+    y = e.layerY;
+  }
+  useCanvas(canvas,img,function(){
+    // get image data
+    var p = canvas.getContext('2d')
+    .getImageData(x, y, 1, 1).data;
+    // show info
+    //result.innerHTML = '<span>HEX: '+rgbToHex(p[0],p[1],p[2])+'</span>'+
+     '<span>RGB:  rgb('+
+      p[0]+','+
+      p[1]+','+
+      p[2]+')</span>';
+    
+    // add background in body
+    document.body.style.background =rgbToHex(p[0],p[1],p[2]);
+  });
+},false);
+
+// preview function mousemove
+img.addEventListener('mousemove', function(e){
+  // chrome
+  if(e.offsetX) {
+    x = e.offsetX;
+    y = e.offsetY; 
+  }
+  // firefox
+  else if(e.layerX) {
+    x = e.layerX;
+    y = e.layerY;
+  }
+  
+  useCanvas(canvas,img,function(){
+    
+    // get image data
+    var p = canvas.getContext('2d')
+    .getImageData(x, y, 1, 1).data;
+    // show preview color
+    preview.style.background = rgbToHex(p[0],p[1],p[2]);
+  });
+},false);
+
+
+// canvas function
+function useCanvas(el,image,callback){
+  el.width = image.width; // img width
+  el.height = image.height; // img height
+  // draw image in canvas tag
+  el.getContext('2d')
+  .drawImage(image, 0, 0, image.width, image.height);
+  return callback();
+}
+// short querySelector
+function _(el){
+  return document.querySelector(el);
+};
+
+// convert rgba to hex 
+// http://stackoverflow.com/questions/5623838/rgb-to-hex-and-hex-to-rgb
+function componentToHex(c) {
+  var hex = c.toString(16);
+  return hex.length == 1 ? "0" + hex : hex;
+}
+function rgbToHex(r, g, b) {
+  return "#" + componentToHex(r) + componentToHex(g) + componentToHex(b);
+}
+
+function findPos(obj) {
+    var curleft = 0, curtop = 0;
+    if (obj.offsetParent) {
+        do {
+            curleft += obj.offsetLeft;
+            curtop += obj.offsetTop;
+        } while (obj = obj.offsetParent);
+        return { x: curleft, y: curtop };
+    }
+    return undefined;
+}
+</script>
+<script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'UA-46156385-1', 'cssscript.com');
+  ga('send', 'pageview');
+
+</script>
+<iframe  frameborder="0" width="90%" height="500px" src="http://localhost:3131/visualize1.html">
+	  <!-- <img src="Seven_segment_display-animated.gif"> -->
+	 
+</div>	  
+
+<!-- ##############################################  END  #################################### -->
+	</td>
+   <td width="4%">&nbsp;</td>
+
+ </tr>
+</table>
+</body>
+</html>

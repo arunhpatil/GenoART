@@ -1,0 +1,14 @@
+#menuContainer { margin:10px 0 0 0}
+ 
+#menu {padding:0; list-style:none; text-align:left; margin:0 auto; font-size:11px; font-family:arial, sans-serif; height:30px; border:1px solid #666; border-width:0 0 1px 0}
+#menu li {display:inline; margin:0 -2px; text-align:left;}
+#menu li a {display:inline-block; height:25px; margin:5px 0 -4px 0; padding:0 20px 0 0; background:url(../images/button.gif) right top; line-height:25px; font-family:arial, sans-serif; font-size:12px; color:#000; text-decoration:none;}
+#menu li a b {display:block; height:25px; float:left; padding:0 0 0 20px; background:url(../images/button.gif) left top; cursor:pointer;}
+
+#menu li a:hover, 
+#menu li a:active,
+#menu li a:focus{background-position:right bottom; color:#fff;}
+
+#menu li a:hover b,
+#menu li a:active b,
+#menu li a:focus b{background-position:left bottom;}
