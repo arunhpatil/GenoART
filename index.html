@@ -294,15 +294,16 @@ $(document).ready(function(){
    A GTF (Gene Transfer Format) will be available to download upon querying, which can later be viewed in any genome visualizer such as UCSC or IGV to compare accross different studies.</p>
    <script>
 	function bcimage(bcid){
-		if(document.getElementById(bcid).style.visibility=="hidden")
-			document.getElementById(bcid).style.visibility = 'visible';
+	
+		if(document.getElementById(bcid).style.display=="none")
+			document.getElementById(bcid).style.display = 'block';
 		else
-			document.getElementById(bcid).style.visibility = 'hidden';
+			document.getElementById(bcid).style.display = 'none';
 	}
    </script>
 	<p align="center"><img src="images/GenoART_tool.jpg" alt="GenoART" style="width:1000px;height:450px;" ></p><br />
 	<img src="./images/Chemelon5.png" alt="Inhouse protocols" style="float:right; width:60px; margin-right: 2 px;" onclick="bcimage('bci')">
-		<div class="thumbnail" align="center"><img src="./images/ColourPicker3.png" id="bci" alt="Inhouse protocols" style="float:right;visibility:hidden; width:450px; margin-right: 10px;"></div>
+		<div class="thumbnail" align="center"><img src="./images/ColourPicker3.png" id="bci" alt="Inhouse protocols" style="float:right;display:none;   width:450px; margin-right: 10px;"></div>
 	<!--<p class="thumbnail" align="center"><img src="images/GenoART_tool_naked_lessDPI.png" alt="GenoART" style="width:1000px;height:450px;"></p><br />-->
 	<canvas id="cs"></canvas>
 	<script>
