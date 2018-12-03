@@ -53,12 +53,32 @@
 
   margin: 0 auto;
 }
+.thumbnail3 img {
+  display: block;
+  cursor: crosshair;
+  margin: 0 auto;
+}
+.thumbnail4 img {
+  display: block;
+  cursor: crosshair;
+
+  margin: 0 auto;
+}
+.thumbnail5 img {
+  display: block;
+  cursor: crosshair;
+
+  margin: 0 auto;
+}
+
 #cs{ 
   display:none;
 }
-#cs2{ 
-  display:none;
-}
+
+
+
+
+
 </style>
 
 <!-- Colour picker ends -->
@@ -70,13 +90,11 @@
     
 </script>	
 <script language="javascript">
-
+var app = require('electron').remote; 
+var dialog = app.dialog;
+var fs = require('fs');
 function Writedata()
 {
-	var app = require('electron').remote; 
-	var dialog = app.dialog;
-	var fs = require('fs');
-	
 	var cleavage = document.getElementsByName('mc');
 	var cleavage_value;
 	for(var i = 0; i < cleavage.length; i++){
@@ -84,20 +102,19 @@ function Writedata()
 			cleavage_value = cleavage[i].value;
 		}
 	}
+	var pro_pepLen = document.getElementById('proteotypic_peptideLength').value;
+	var proteinLen = document.getElementById('proteinLength').value;
+	var outputSuffixName = document.getElementById('suffixName').value;
+	
 	"use strict";
 	// The path to the .bat file
-
-
+	var filepath = "config.bat";
 	var gtf_name = document.getElementById('gtf').value;
 	if( gtf_name ) {
-	
-		var filepath = "config.bat";
-		
 		var content = "bin\\fetch_seq.exe"+" "+document.getElementById('genome').files[0].path+" "+document.getElementById('gtf').files[0].path+"\n"
-		+"perl "+"bin\\GenoART.pl "+ cleavage_value +" "+ document.getElementById('enzyme').value+" "+ document.getElementById('genome').files[0].path+" "+ document.getElementById('genetic_code').value+"\n"
-		+"bin\\s2s_db_creator.exe"+" "+document.getElementById('genome').files[0].path+"\n"; 
+		+"bin\\perl.exe "+"bin\\GenoART.pl "+ cleavage_value +" "+ document.getElementById('enzyme').value+" "+ document.getElementById('genome').files[0].path+" "+ document.getElementById('genetic_code').value+" "+pro_pepLen+" "+proteinLen+ " "+outputSuffixName +"\n";
 		
-	
+			
 		fs.writeFile(filepath, content, (err) => {
 		if (err) {
 			alert("An error ocurred updating the file" + err.message);
@@ -110,24 +127,67 @@ function Writedata()
 	}
 	else
 	{
-		//s.WriteLine("bin\\fetch_seq.exe"+" "+document.getElementById('genome').value+" 0"+"\n"
-	//	+"bin\\perl.exe "+"bin\\GenoART.pl "+ cleavage_value +" "+ document.getElementById('enzyme').value+" "+ document.getElementById('genome').value+" "+ document.getElementById('genetic_code').value+"\n"
-	//	+"bin\\s2s_db_creator.exe"+" "+document.getElementById('genome').value+"\n");
-		//alert('No GTF/GFF provided, executing six-frame translation of genome\n\nThe data has been written to \n' + write_id);
-	//	s.Close();
-	//	RunExe()
-		//s.WriteLine("perl "+"categorization.pl "+document.getElementById('genome').value +" "+document.getElementById('gtf').value+"\n");
+		var content = "bin\\fetch_seq.exe"+" "+document.getElementById('genome').files[0].path+" "+"0"+"\n"
+		+"bin\\perl.exe "+"bin\\GenoART.pl "+ cleavage_value +" "+ document.getElementById('enzyme').value+" "+ document.getElementById('genome').files[0].path+" "+ document.getElementById('genetic_code').value+" "+pro_pepLen+" "+proteinLen+ " "+outputSuffixName+"\n";
+		
+		fs.writeFile(filepath, content, (err) => {
+		if (err) {
+			alert("An error ocurred updating the file" + err.message);
+			console.log(err);
+			return;
+		}
+		//alert("Your files are being processed in batch");
+		RunExe_nodeJS(filepath)
+		});
+		alert("No GTF provided, executing 6'-frame translation of genome");
 	}
 }
+
+function WriteDataToAnalyze()
+{
+	var write_file = "config_analyze.bat";
+	var custom_gtf_name = document.getElementById('custom_gtf').value;
+	if (custom_gtf_name) {
+	var content_analyze = "bin\\perl.exe "+"bin\\localization.pl "+ document.getElementById('custom_gtf').files[0].path +" "+ document.getElementById('ref_cds').files[0].path+" "+ document.getElementById('ref_gtf').files[0].path+" "+ document.getElementById('gssps_txt').files[0].path+"\n"
+	+"bin\\perl.exe bin\\remove_redundant_gtf.pl"+" "+document.getElementById('gssps_txt').files[0].path+"\n";
+	
+	fs.writeFile(write_file, content_analyze, (err) => {
+	if (err) {
+			alert("An error ocurred updating the file" + err.message);
+			console.log(err);
+			return;
+		}
+		//alert("Your files are being processed in batch");
+		RunExe_nodeJS2(write_file)
+		});
+		//alert("No GTF provided, executing 6'-frame translation of genome");
+	}
+	else {alert("ERROR: GTF file not provided!!");}
+}
+
+
 function RunExe_nodeJS(myBatFilePath){
-	require('child_process').exec( "start cmd /k " + __dirname + "\\"+myBatFilePath, function (err, stdout, stderr) {
+	document.getElementById("progress_bar").style.display="block";
+	require('child_process').exec( "start cmd /c " + __dirname + "\\"+myBatFilePath, function (err, stdout, stderr) {
 	if (err) {
 		return console.log(err);
 	}
+	document.getElementById("progress_bar").style.display="none";
+	alert ("Process is complete!!");
 	console.log(stdout);
 	});
 }
-	
+function RunExe_nodeJS2(myBatFilePath){
+	document.getElementById("progress_bar2").style.display="block";
+	require('child_process').exec( "start cmd /c " + __dirname + "\\"+myBatFilePath, function (err, stdout, stderr) {
+	if (err) {
+		return console.log(err);
+	}
+	document.getElementById("progress_bar2").style.display="none";
+	alert ("Process is complete!!");
+	console.log(stdout);
+	});
+}	
 </script>
 <!--<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>-->
 <!-- Insert this line above script imports  -->
@@ -150,6 +210,8 @@ var readme_flag = 0;
 var preparatory_flag = 0; 
 var revise_flag = 0; 
 var visualize_flag = 0;
+var canvas2;
+var img2;
 $(document).ready(function(){
 	introduction_flag = 1;
      $("#introduction").show 
@@ -157,12 +219,13 @@ $(document).ready(function(){
 	 $("#preparatory_js").hide();
 	 $("#revise_js").hide();
 	 $("#visualise_js").hide();
-
+	
 });
 
 $(document).ready(function(){
     $("#introduction").click(function(){
-	//img = _('.thumbnail img');
+ 
+	
 	    introduction_flag = 1;
 		readme_flag = 0;
 		preparatory_flag = 0;
@@ -248,122 +311,11 @@ $(document).ready(function(){
     $(this).addClass("active");
 });
 });
-</script>  
 
-</head>
+</script> 
 
-<body bgcolor="#ece5f5">
-<!-- Colour picker starts-->
-
-
-<!-- Colour picker ends -->
-
-
-<div id="myDIV">
-<ul class="headertab">
-  <li><a id="introduction" class="active" class="width:70px" >Home</a></li>
-  <li><a id="readme" class="#"  >Read Me</a></li>
-  <li><a id="preparatory" class="#" >Customize</a></li>
-  <li><a id="revise" class="#"  >Analyze</a></li>
-  <li><a id="visualise" class="#" >Visualize</a></li>
-  <!-- <li style="float:right"></li> -->
-  <a href="about.html" target="_blank" ><img src="./images/ihp_icon_wc2.png" alt="Inhouse protocols" style="float:right; width:45px; margin-right: 10px;"></a>
-</ul>	
-
-</div>
-<h2 align="center"><em>GenoART: Genome Annotation and Refinement Tool</em></h2>
-<table height="69%" width="1298" id="border-radius" class="border-radius-example">
-
-<!--<tr  height="20" valign="top">
-   <td height="23" >&nbsp;</td>
-   <td colspan="2">&nbsp;</td>
-   <td>&nbsp;</td>
- </tr> -->
-<tr valign="top">
- 
-   <td width="3%" height="24" >&nbsp;</td>
-   <td colspan="2"> 
- 
-
-<!-- ##############################################  Introduction  #################################### -->
-<div id="introduction_js">
-   <p align="justify" >
-   GenoART is a standalone application for detecting coding potential of transcripts complemented by experimentally derived proteomics (MS/MS) data. GenoART will make use of Python, PERL and javascripts for processing your input genome and create a custom database for proteogenomic searches. A detailed protocol is available online. 
-   In simple terms, the custom database generated by this application can be used as a reference protein database and search the unmatched/unassigned spectra in any search engines such as Mascot, SEQUEST, X! Tandem or Andromeda.  
-   GenoART can be queried to categorize and browse these resultant peptides at the click of a button. The peptides will include the genomic coordinates which allows user to navigate to UCSC genome browser which can facilitate more details about the gene/transcript and can be compaired with predicted genes, Expressed sequence Tag (EST), and perform comparitive genomics for more evidence. 
-   A GTF (Gene Transfer Format) will be available to download upon querying, which can later be viewed in any genome visualizer such as UCSC or IGV to compare accross different studies.</p>
-   <script>
-	function bcimage(bcid){
-	
-		if(document.getElementById(bcid).style.display=="none")
-			document.getElementById(bcid).style.display = 'block';
-		else
-			document.getElementById(bcid).style.display = 'none';
-	}
-   </script>
-	<p align="center"><img src="images/GenoART_tool.jpg" alt="GenoART" style="width:1000px;height:450px;" ></p><br />
-	<img src="./images/Chemelon5.png" alt="Inhouse protocols" style="float:right; width:60px; margin-right: 2 px;" onclick="bcimage('bci')">
-		<div class="thumbnail" align="center"><img src="./images/ColourPicker3.png" id="bci" alt="Inhouse protocols" style="float:right;display:none;   width:450px; margin-right: 10px;"></div>
-	<!--<p class="thumbnail" align="center"><img src="images/GenoART_tool_naked_lessDPI.png" alt="GenoART" style="width:1000px;height:450px;"></p><br />-->
-	<canvas id="cs"></canvas>
 	<script>
-// vars
-var img = _('.thumbnail img'),
-	canvas = _('#cs'),
-    result = _('.result'),
-    preview = _('.preview'),x = '',y = '';
 
-// click function
-img.addEventListener('click', function(e){
-
-  // chrome
-  if(e.offsetX) {
-    x = e.offsetX;
-    y = e.offsetY; 
-  }
-  // firefox
-  else if(e.layerX) {
-    x = e.layerX;
-    y = e.layerY;
-  }
-  useCanvas(canvas,img,function(){
-    // get image data
-    var p = canvas.getContext('2d')
-    .getImageData(x, y, 1, 1).data;
-    // show info
-    //result.innerHTML = '<span>HEX: '+rgbToHex(p[0],p[1],p[2])+'</span>'+
-     '<span>RGB:  rgb('+
-      p[0]+','+
-      p[1]+','+
-      p[2]+')</span>';
-    
-    // add background in body
-    document.body.style.background =rgbToHex(p[0],p[1],p[2]);
-  });
-},false);
-
-// preview function mousemove
-img.addEventListener('mousemove', function(e){
-  // chrome
-  if(e.offsetX) {
-    x = e.offsetX;
-    y = e.offsetY; 
-  }
-  // firefox
-  else if(e.layerX) {
-    x = e.layerX;
-    y = e.layerY;
-  }
-  
-  useCanvas(canvas,img,function(){
-    
-    // get image data
-    var p = canvas.getContext('2d')
-    .getImageData(x, y, 1, 1).data;
-    // show preview color
-    preview.style.background = rgbToHex(p[0],p[1],p[2]);
-  });
-},false);
 
 
 // canvas function
@@ -403,6 +355,64 @@ function findPos(obj) {
 }
 </script>
 
+</head>
+
+<body bgcolor="#ece5f5">
+<!-- Colour picker starts-->
+
+
+<!-- Colour picker ends -->
+
+
+<div id="myDIV">
+<ul class="headertab">
+  <li><a id="introduction" class="active" class="width:70px" >Home</a></li>
+  <li><a id="readme" class="#"  >Read Me</a></li>
+  <li><a id="preparatory" class="#" >Customize</a></li>
+  <li><a id="revise" class="#"  >Analyze</a></li>
+  <li><a id="visualise" class="#" >Visualize</a></li>
+  <!-- <li style="float:right"></li> -->
+  <a href="about.html" target="_blank" ><img src="./images/ihp_icon_wc2.png" alt="Inhouse protocols" style="float:right; width:45px; margin-right: 10px;"></a>
+</ul>	
+
+</div>
+<h2 align="center"><em>GenoART: Genome Annotation and Refinement Tool</em></h2>
+<table height="69%" width="1298" id="border-radius" class="border-radius-example">
+
+<!--<tr  height="20" valign="top">
+   <td height="23" >&nbsp;</td>
+   <td colspan="2">&nbsp;</td>
+   <td>&nbsp;</td>
+ </tr> -->
+<tr valign="top">
+ 
+   <td width="3%" height="24" >&nbsp;</td>
+   <td colspan="2"> 
+ 
+
+<!-- ##############################################  Introduction  #################################### -->
+<div id="introduction_js">
+   <p align="justify" style="margin-right: 80px;" >
+   GenoART is a standalone application for detecting coding potential of transcripts complemented by experimentally derived proteomics (MS/MS) data. GenoART will make use of Python, PERL and javascripts for processing your input genome and create a custom database for proteogenomic searches. A detailed protocol is available online. 
+   In simple terms, the custom database generated by this application can be used as a reference protein database and search the unmatched/unassigned spectra in any search engines such as Mascot, SEQUEST, X! Tandem or Andromeda.  
+   GenoART can be queried to categorize and browse these resultant peptides at the click of a button. The peptides will include the genomic coordinates which allows user to navigate to UCSC genome browser which can facilitate more details about the gene/transcript and can be compaired with predicted genes, Expressed sequence Tag (EST), and perform comparitive genomics for more evidence. 
+   A GTF (Gene Transfer Format) will be available to download upon querying, which can later be viewed in any genome visualizer such as UCSC or IGV to compare accross different studies.</p>
+   <script>
+	function bcimage(bcid){
+	
+		if(document.getElementById(bcid).style.display=="none")
+			document.getElementById(bcid).style.display = 'block';
+		else
+			document.getElementById(bcid).style.display = 'none';
+	}
+   </script>
+	<p align="center"><img src="images/GenoART_tool.jpg" alt="GenoART" style="width:1000px;height:450px;" ></p><br />
+	<img src="./images/Chemelon5.png" alt="Inhouse protocols" style="float:right; width:60px; margin-right: 2 px;" onclick="bcimage('bci')">
+		<div class="thumbnail"  align="center"><img src="./images/ColourPicker3.png" id="bci" alt="Inhouse protocols" style="float:right;display:none;   width:450px; margin-right: 10px;"></div>
+	<!--<p class="thumbnail" align="center"><img src="images/GenoART_tool_naked_lessDPI.png" alt="GenoART" style="width:1000px;height:450px;"></p><br />-->
+	<canvas id="cs"></canvas>
+
+
 	
 	
 <br>
@@ -410,78 +420,36 @@ function findPos(obj) {
 <!-- ##############################################  Read me  #################################### -->
 
 <div id="readme_js">	
-<a style="font-family:Helvetica;font-weight: bold;">Read me</b></a>
-<p align="justify" >In the preparatory analysis, the peptides provided by the user is filtered with the known reference database and remove ambiguous peptides introduced by isobaric ions. A tab delimited text file should be provided as input, where the first column should be peptide sequence. The preparatory analysis yields two files: one mapping to reference proteins and one that doesn't map, and they are named as ProteinCoding and GSSPs respectively. </br></br>NOTE: The file name should not contain special characters or spaces. Please find a sample input file for reference.</p>
+<p align="justify" style="margin-right: 80px;">
+Genome Annotatoin and Refinement Tool (GenoART) is a cross-platform tool for the proteogenomics analysis. The functional units of the GenoART tool are divided into three modules such as &quotCustomize&quot, &quotAnalyze&quot and &quotVisualize&quot. The usage of each module is described below: <br><br>
 
+<a style="font-family:Helvetica;font-weight: bold;color: blue;" >Customize</b></a><br>
+<p align="justify" style="margin-right: 80px;">This module is a preparatory process and is used to create a custom database for the proteogenomics analysis. This database can be used as reference in searching the spectral information derived from the MS/MS based proteomics data using any search engine. This module takes genome in fasta format as input to create a custom database along with list of genomic coordinates for each proteotypic peptide following the theoretical digestion of the translated genome.<br> <br>The features of the customization module are: <br><br>
+<strong>i. Genome translation: </strong>The translation of genome can be achieved for any organism. Translation of the genome (fasta) in three frames is applicable when Gene Transfer Format (GTF) / Gene Feature Format (GFF) file is provided or otherwise the translation of genome in six frames is selected by default. If GTF/GFF is supplemented, the python script will read the coordinates of transcripts and exons and fetches the genomic sequence of the given organism. A fasta file is generated in this step, which contain the chromosome/scaffold name along with the coordinates of exon pairs as the header information followed by its corresponding nucleotide sequence from the genome.<br><br>
+<strong>ii. Proteotypic enzyme: </strong>Digestive enzymes such as Trypsin, Chymotrypsin, Lys-C, Lys-N, AspN, GluC and ArgC are available for the proteotypic cleavage of the proteins. Enzyme trypsin is selected by default. <br><br>
+<strong>iii. Number of missed cleavages:</strong>	Up to two missed cleavages of the proteotypic peptides are allowed. If two missed cleavages are specified, then the end output will contain the genomic coordinates of the peptides with zero, one and two missed cleavages.<br><br>
+<strong>iv. Genetic code:</strong> All genetic code tables derived from NCBI are available for translation of the genome. The Standard code is set as default.<br><br>
+Based on the number of missed cleavages allowed, proteotypic enzyme used and the genetic code followed, the PERL scripts will translate the nucleotide sequence in to three or six frame translation based on the preferred choice. During the translation, the polypeptide sequence between stop to stop codon, whose length is greater than six amino acids is retained to make a custom database. This custom database also includes polypeptide sequence between Metheonine (Met, M) to stop codon, whose length is >= 6 amino acids and with at least one proteotypic cleavage site for its identification. This custom database is used to search the unassigned spectra for genome annotation and refinement.
+Further, during the translation, it records the coordinates of the genomic location for each proteotypic peptides in the form of a custom GTF file. An internal identifier (IID) is defined for each peptide for the classification of strand and splicing information. The IID classification is such that, the prefix &quot10101(auto increment)&quot and &quot10011(auto increment)&quot represent exonic and junctional peptide respectively in forward strand. While, &quot10110(auto increment)&quot and &quot10010(auto increment)&quot represent exonic and junctional peptide respectively in the reverse strand. This custom GTF file can be used to visualize in the inherent IGV in the visualize module of GenoART or use UCSC or similar genome browsers. Also, this custom GTF file is used as one of the input file in the Analyze module.
+<br><br>
+<a style="font-family:Helvetica;font-weight: bold;color: blue;" >Analyze</b></a><br><br>
+As the name suggests, this module is used for analyzing the query peptides obtained as a result of searching the MS/MS data against the custom built database using the preferred search engine. Analyze module filters/remove peptides from a given reference database, extract the genomic coordinates and categorize the peptides in the genomic location of the given organism. Further, a categorized GTF file is generated for the query peptides which can be visualized in the visualize module or any other genome browsers. <br><br>The analyze module considers the following input files:<br><br>
+<strong>i.	Custom GTF:</strong> This is the file containing genomic coordinates of peptides produced in the customize module of GenoART. The query peptides are searched in this custom GTF file using hash indexing and genomic coordinates are fetched for further localizing of the peptides.<br><br>
+<strong>ii.	Reference protein:</strong> The query peptides are searched for exact string match from the given protein database in fasta format and also, it removes ambiguity of the isobaric mass difference seen in Leucine (Leu) and Isoleucine (Ilu). <br><br>
+<strong>iii. Reference annotation:</strong> The reference annotation in GTF contains the genomic coordinates of transcripts and exons for all the reference transcripts of any given organism. The genomic coordinates of the query peptides obtained are compared with this reference annotation, and based on the strand information the peptides can be classified into (a) peptides mapping to the known proteins in the alternate frame, (b) peptides mapping in the intronic region, (c) peptides with 5&rsquo; or 3&rsquo; gene/exon extension, (d) N or C &#45; terminal protein extension and so on. <br><br>
+<strong>iv.	Query peptides:</strong> This is a list of peptides obtained as a result of the MS/MS spectra search against the custom database. The input file should be in tab delimited text format and should contain peptide sequence as the first column.<br><br>
+In the preparatory analysis, the peptides provided by the user is filtered with the known reference database and remove ambiguous peptides introduced by isobaric ions. A tab delimited text file should be provided as input, where the first column should be peptide sequence. The preparatory analysis yields two files: one mapping to reference proteins and one that doesn't map, and they are named as ProteinCoding and GSSPs respectively. </br></br>NOTE: The file name should not contain special characters or spaces. Please find a sample input file for reference.</p>
+<br>
+<a style="font-family:Helvetica;font-weight: bold;color: blue;" >Visualize</b></a><br><br>
+ In the visualize module, we have incorporated Integrated Genome Viewer (IGV), developed in java script for aiding in visualization of the GTF files generated in GenoART and to aid in further understanding of the genome annotation and refinement or revising the existing gene/transcript models. 
+</P>
+ 
 
  <img src="./images/Chemelon5.png" alt="Inhouse protocols" style="float:right; width:60px; margin-right: 2 px;" onclick="bcimage('bci2')">
- 
- <p  class="thumbnail2" align="center"><img  src="./images/ColourPicker3.png" id="bci2" alt="Inhouse protocols" style="float:right;visibility:hidden; white-space: nowrap;width:500px; margin-right: 10px;"></p>
+		<div class="thumbnail2"  align="center"><img src="./images/ColourPicker3.png" id="bci2" alt="Inhouse protocols" style="float:right;display:none;   width:450px; margin-right: 10px;"></div>
 	<!--<p class="thumbnail" align="center"><img src="images/GenoART_tool_naked_lessDPI.png" alt="GenoART" style="width:1000px;height:450px;"></p><br />-->
-	<canvas id="cs2"></canvas>
-	<script>
-// vars
-
-var img2 = _('.thumbnail2 img'),
-	canvas2 = _('#cs2');
-    
-
-// click function
-img2.addEventListener('click', function(e){
-
-  // chrome
-  if(e.offsetX) {
-    x = e.offsetX;
-    y = e.offsetY; 
-  }
-  // firefox
-  else if(e.layerX) {
-    x = e.layerX;
-    y = e.layerY;
-  }
-  useCanvas(canvas2,img2,function(){
-    // get image data
-    var p = canvas2.getContext('2d')
-    .getImageData(x, y, 1, 1).data;
-    // show info
-    //result.innerHTML = '<span>HEX: '+rgbToHex(p[0],p[1],p[2])+'</span>'+
-     '<span>RGB:  rgb('+
-      p[0]+','+
-      p[1]+','+
-      p[2]+')</span>';
-    
-    // add background in body
-    document.body.style.background =rgbToHex(p[0],p[1],p[2]);
-  });
-},false);
-
-// preview function mousemove
-img2.addEventListener('mousemove', function(e){
-  // chrome
-  if(e.offsetX) {
-    x = e.offsetX;
-    y = e.offsetY; 
-  }
-  // firefox
-  else if(e.layerX) {
-    x = e.layerX;
-    y = e.layerY;
-  }
-  
-  useCanvas(canvas2,img2,function(){
-    
-    // get image data
-    var p = canvas2.getContext('2d')
-    .getImageData(x, y, 1, 1).data;
-    // show preview color
-    preview.style.background = rgbToHex(p[0],p[1],p[2]);
-  });
-},false);
 
 
-
-</script>
- 
 <!-- <p><em><strong>Preparatory or Preliminary analysis:</strong></em></p> 	-->
 <!--<form action="ihp_proteogenomics_analysis.php"  target="_blank" method="post" enctype="multipart/form-data"> -->
 	<br>	 
@@ -519,8 +487,35 @@ a GTF/GFF file you can select "No evidence" below. If on the other hand you woul
 			Select number of missed cleavages (Mc):
 			<input type="radio" checked="checked" name="mc" value="0"> 0 Mc
 			<input type="radio" name="mc" value="1"> 1 Mc
-			<input type="radio" name="mc" value="2"> 2 Mc<br/><br/>
-         Genome:&nbsp;&nbsp;	
+			<input type="radio" name="mc" value="2"> 2 Mc<br/>
+		
+<br>Select minimum proteotypic peptide length:
+			<select id="proteotypic_peptideLength">
+			<option selected="selected" value="7">07</option>
+			<option value="8">08</option>
+			<option value="9">09</option>
+			<option value="10">10</option>
+			<option value="11">11</option>
+			<option value="12">12</option>
+			<option value="13">13</option>
+			<option value="14">14</option>
+			<option value="15">15</option>
+			</select>&nbsp;<img src="./images/imageIcon2.png" title="Define minimum length of the peptide to be considered in the study. (Default: >= 7 amino acids)" alt="Info" style="width:14px;margin-bottom: -4px;" ><br>		
+
+<br>Select minimum protein length:
+			<select id="proteinLength">
+			<option selected="selected" value="7">07</option>
+			<option value="8">08</option>
+			<option value="9">09</option>
+			<option value="10">10</option>
+			<option value="11">11</option>
+			<option value="12">12</option>
+			<option value="13">13</option>
+			<option value="14">14</option>
+			<option value="15">15</option>
+			</select>&nbsp;<img src="./images/imageIcon2.png" title="Define the minimum length of protein to be considered in the custom database. (Default: >= 7 amino acids)" alt="Info" style="width:14px;margin-bottom: -4px;" ><br>		<br>		
+			
+        Genome:&nbsp;&nbsp;	
             <input type="file" name="genome" id="genome" required>
             <br /><br/>
 		GTF/GFF:
@@ -557,13 +552,18 @@ a GTF/GFF file you can select "No evidence" below. If on the other hand you woul
 			<option value="t_t30.txt">Peritrich Nuclear</option>
 			<option value="t_t31.txt">Blastocrithidia Nuclear</option>
 			</select><br>
-     (<em> Source: <a href="https://www.ncbi.nlm.nih.gov/Taxonomy/Utils/wprintgc.cgi" target="_blank">NCBI</a> </em>)        
+		    (<em> Source: <a href="https://www.ncbi.nlm.nih.gov/Taxonomy/Utils/wprintgc.cgi" target="_blank">NCBI</a> </em>)        
+			<br><br>Suffix output file name: <input type="text" name="suffixName" id="suffixName">&nbsp;<img src="./images/imageIcon2.png" title="Enter suffix to the output file. Syntax: Genome_pep_ <suffix>.fasta. Example: trypsin. outputfile: Hg38_pep_trypsin.fasta" alt="Info" style="width:14px;margin-bottom: -4px;" ><br>
 	</div><br>
 	<p align="left">Create custom database:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 	<input type="button" value="Submit " onClick="Writedata()";>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<input type="reset" value="  Reset  "></p>
-     </form>
-<img src="./images/Chemelon5.png" alt="Inhouse protocols" style="float:right; width:60px; margin-right: 2 px;" onclick="bcimage()">
-<p class="thumbnail" align="center"><img src="./images/ihp_icon_wc2.png" id="bci" alt="Inhouse protocols" style="float:right;visibility:hidden; width:45px; margin-right: 10px;"></p>
+     <div style="display:none" id="progress_bar"><img src="images/loading.gif" style="width:150px; margin-bottom: 50px;"/></div>
+	 </form>
+<img src="./images/Chemelon5.png" alt="Inhouse protocols" style="float:right; width:60px; margin-right: 2 px;" onclick="bcimage('bci3')">
+		<div class="thumbnail3" align="center"><img src="./images/ColourPicker3.png" id="bci3" alt="Inhouse protocols" style="float:right;display:none;   width:450px; margin-right: 10px;"></div>
+	<!--<p class="thumbnail" align="center"><img src="images/GenoART_tool_naked_lessDPI.png" alt="GenoART" style="width:1000px;height:450px;"></p><br />-->
+	<canvas id="cs2"></canvas>
+	
 	<!--<p class="thumbnail" align="center"><img src="images/GenoART_tool_naked_lessDPI.png" alt="GenoART" style="width:1000px;height:450px;"></p><br />-->
 </div>    
 	
@@ -585,9 +585,11 @@ a GTF/GFF file you can select "No evidence" below. If on the other hand you woul
 		<input type="button" value="Submit " onClick="WriteDataToAnalyze()";>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<input type="reset" value="  Reset  "></p>
             <br />
 	</div>
+	<div style="display:none" id="progress_bar2"><img src="images/loading.gif" style="width:150px; margin-bottom: 50px;"/></div>
       </form><br /> 
-	  <img src="./images/Chemelon5.png" alt="Inhouse protocols" style="float:right; width:60px; margin-right: 2 px;" onclick="bcimage()">
-	  <p class="thumbnail" align="center"><img src="./images/ihp_icon_wc2.png" id="bci" alt="Inhouse protocols" style="float:right;visibility:hidden; width:45px; margin-right: 10px;"></p>
+	  <img src="./images/Chemelon5.png" alt="Inhouse protocols" style="float:right; width:60px; margin-right: 2 px;" onclick="bcimage('bci4')">
+		<div class="thumbnail4"  align="center"><img src="./images/ColourPicker3.png" id="bci4" alt="Inhouse protocols" style="float:right;display:none;   width:450px; margin-right: 10px;"></div>
+	
 	<!--<p class="thumbnail" align="center"><img src="images/GenoART_tool_naked_lessDPI.png" alt="GenoART" style="width:1000px;height:450px;"></p><br />-->
 </div>	  
 
@@ -596,11 +598,299 @@ a GTF/GFF file you can select "No evidence" below. If on the other hand you woul
 
 <div id="visualise_js">	  
 <!-- <a  style="font-family:Helvetica;font-weight: bold;">Visualize: igv</a>    -->
-<img src="./images/Chemelon5.png" alt="Inhouse protocols" style="float:right; width:60px; margin-right: 2 px;" onclick="bcimage()">
-	  <p class="thumbnail" align="center"><img src="./images/ihp_icon_wc2.png" id="bci" alt="Inhouse protocols" style="float:right;visibility:hidden; width:45px; margin-right: 10px;"></p>
+ <img src="./images/Chemelon5.png" alt="Inhouse protocols" style="float:right; width:60px; margin-right: 2 px;" onclick="bcimage('bci5')">
+		<div class="thumbnail5"  align="center"><img src="./images/ColourPicker3.png" id="bci5" alt="Inhouse protocols" style="float:right;display:none;   width:450px; margin-right: 10px;"></div>
+	
+<script>
+// vars
+ 
+	canvas2 = _('#cs'); 
+	
+	
+	img1 = _('.thumbnail img'); 
+	
+	
+	// click function
+	img1.addEventListener('click', function(e){
+
+	  // chrome
+	  if(e.offsetX) {
+		x = e.offsetX;
+		y = e.offsetY; 
+	  }
+	  // firefox
+	  else if(e.layerX) {
+		x = e.layerX;
+		y = e.layerY;
+	  }
+	  useCanvas(canvas2,img1,function(){
+		// get image data
+		var p = canvas2.getContext('2d')
+		.getImageData(x, y, 1, 1).data;
+		// show info
+		//result.innerHTML = '<span>HEX: '+rgbToHex(p[0],p[1],p[2])+'</span>'+
+		 '<span>RGB:  rgb('+
+		  p[0]+','+
+		  p[1]+','+
+		  p[2]+')</span>';
+		
+		// add background in body
+		document.body.style.background =rgbToHex(p[0],p[1],p[2]);
+	  });
+	},false);
+
+	// preview function mousemove
+	img1.addEventListener('mousemove', function(e){
+	  // chrome
+	  if(e.offsetX) {
+		x = e.offsetX;
+		y = e.offsetY; 
+	  }
+	  // firefox
+	  else if(e.layerX) {
+		x = e.layerX;
+		y = e.layerY;
+	  }
 	  
+	  useCanvas(canvas2,img1,function(){
+		
+		// get image data
+		var p = canvas2.getContext('2d')
+		.getImageData(x, y, 1, 1).data;
+		// show preview color
+		preview.style.background = rgbToHex(p[0],p[1],p[2]);
+	  });
+	},false);
+	
+	img2 = _('.thumbnail2 img');
+	
+	// click function
+	img2.addEventListener('click', function(e){
+
+	  // chrome
+	  if(e.offsetX) {
+		x = e.offsetX;
+		y = e.offsetY; 
+	  }
+	  // firefox
+	  else if(e.layerX) {
+		x = e.layerX;
+		y = e.layerY;
+	  }
+	  useCanvas(canvas2,img2,function(){
+		// get image data
+		var p = canvas2.getContext('2d')
+		.getImageData(x, y, 1, 1).data;
+		// show info
+		//result.innerHTML = '<span>HEX: '+rgbToHex(p[0],p[1],p[2])+'</span>'+
+		 '<span>RGB:  rgb('+
+		  p[0]+','+
+		  p[1]+','+
+		  p[2]+')</span>';
+		
+		// add background in body
+		document.body.style.background =rgbToHex(p[0],p[1],p[2]);
+	  });
+	},false);
+
+	// preview function mousemove
+	img2.addEventListener('mousemove', function(e){
+	  // chrome
+	  if(e.offsetX) {
+		x = e.offsetX;
+		y = e.offsetY; 
+	  }
+	  // firefox
+	  else if(e.layerX) {
+		x = e.layerX;
+		y = e.layerY;
+	  }
+	  
+	  useCanvas(canvas2,img2,function(){
+		
+		// get image data
+		var p = canvas2.getContext('2d')
+		.getImageData(x, y, 1, 1).data;
+		// show preview color
+		preview.style.background = rgbToHex(p[0],p[1],p[2]);
+	  });
+	},false);
+	
+	
+	img3 = _('.thumbnail3 img'); 
+	
+	
+	// click function
+	img3.addEventListener('click', function(e){
+
+	  // chrome
+	  if(e.offsetX) {
+		x = e.offsetX;
+		y = e.offsetY; 
+	  }
+	  // firefox
+	  else if(e.layerX) {
+		x = e.layerX;
+		y = e.layerY;
+	  }
+	  useCanvas(canvas2,img3,function(){
+		// get image data
+		var p = canvas2.getContext('2d')
+		.getImageData(x, y, 1, 1).data;
+		// show info
+		//result.innerHTML = '<span>HEX: '+rgbToHex(p[0],p[1],p[2])+'</span>'+
+		 '<span>RGB:  rgb('+
+		  p[0]+','+
+		  p[1]+','+
+		  p[2]+')</span>';
+		
+		// add background in body
+		document.body.style.background =rgbToHex(p[0],p[1],p[2]);
+	  });
+	},false);
+
+	// preview function mousemove
+	img3.addEventListener('mousemove', function(e){
+	  // chrome
+	  if(e.offsetX) {
+		x = e.offsetX;
+		y = e.offsetY; 
+	  }
+	  // firefox
+	  else if(e.layerX) {
+		x = e.layerX;
+		y = e.layerY;
+	  }
+	  
+	  useCanvas(canvas2,img3,function(){
+		
+		// get image data
+		var p = canvas2.getContext('2d')
+		.getImageData(x, y, 1, 1).data;
+		// show preview color
+		preview.style.background = rgbToHex(p[0],p[1],p[2]);
+	  });
+	},false);
+	
+	
+	img4 = _('.thumbnail4 img'); 
+	
+	// click function
+	img4.addEventListener('click', function(e){
+
+	  // chrome
+	  if(e.offsetX) {
+		x = e.offsetX;
+		y = e.offsetY; 
+	  }
+	  // firefox
+	  else if(e.layerX) {
+		x = e.layerX;
+		y = e.layerY;
+	  }
+	  useCanvas(canvas2,img4,function(){
+		// get image data
+		var p = canvas2.getContext('2d')
+		.getImageData(x, y, 1, 1).data;
+		// show info
+		//result.innerHTML = '<span>HEX: '+rgbToHex(p[0],p[1],p[2])+'</span>'+
+		 '<span>RGB:  rgb('+
+		  p[0]+','+
+		  p[1]+','+
+		  p[2]+')</span>';
+		
+		// add background in body
+		document.body.style.background =rgbToHex(p[0],p[1],p[2]);
+	  });
+	},false);
+
+	// preview function mousemove
+	img4.addEventListener('mousemove', function(e){
+	  // chrome
+	  if(e.offsetX) {
+		x = e.offsetX;
+		y = e.offsetY; 
+	  }
+	  // firefox
+	  else if(e.layerX) {
+		x = e.layerX;
+		y = e.layerY;
+	  }
+	  
+	  useCanvas(canvas2,img4,function(){
+		
+		// get image data
+		var p = canvas2.getContext('2d')
+		.getImageData(x, y, 1, 1).data;
+		// show preview color
+		preview.style.background = rgbToHex(p[0],p[1],p[2]);
+	  });
+	},false);
+	
+	
+	
+	img5 = _('.thumbnail5 img'); 
+	
+	// click function
+	img5.addEventListener('click', function(e){
+
+	  // chrome
+	  if(e.offsetX) {
+		x = e.offsetX;
+		y = e.offsetY; 
+	  }
+	  // firefox
+	  else if(e.layerX) {
+		x = e.layerX;
+		y = e.layerY;
+	  }
+	  useCanvas(canvas2,img5,function(){
+		// get image data
+		var p = canvas2.getContext('2d')
+		.getImageData(x, y, 1, 1).data;
+		// show info
+		//result.innerHTML = '<span>HEX: '+rgbToHex(p[0],p[1],p[2])+'</span>'+
+		 '<span>RGB:  rgb('+
+		  p[0]+','+
+		  p[1]+','+
+		  p[2]+')</span>';
+		
+		// add background in body
+		document.body.style.background =rgbToHex(p[0],p[1],p[2]);
+	  });
+	},false);
+
+	// preview function mousemove
+	img5.addEventListener('mousemove', function(e){
+	  // chrome
+	  if(e.offsetX) {
+		x = e.offsetX;
+		y = e.offsetY; 
+	  }
+	  // firefox
+	  else if(e.layerX) {
+		x = e.layerX;
+		y = e.layerY;
+	  }
+	  
+	  useCanvas(canvas2,img5,function(){
+		
+		// get image data
+		var p = canvas2.getContext('2d')
+		.getImageData(x, y, 1, 1).data;
+		// show preview color
+		preview.style.background = rgbToHex(p[0],p[1],p[2]);
+	  });
+	},false);
+	
+	
+
+
+
+
+</script> 	  
 	<!--<p class="thumbnail" align="center"><img src="images/GenoART_tool_naked_lessDPI.png" alt="GenoART" style="width:1000px;height:450px;"></p><br />-->
-<iframe  frameborder="0" width="90%" height="800px" src="http://localhost:3131/visualize_me.html">
+<iframe  frameborder="0" width="90%" height="800px" src="visualization/visualize_me.html">
 	  <!-- <img src="Seven_segment_display-animated.gif"> -->
 	 
 </div>	  
@@ -611,5 +901,6 @@ a GTF/GFF file you can select "No evidence" below. If on the other hand you woul
 
  </tr>
 </table>
+
 </body>
 </html>
