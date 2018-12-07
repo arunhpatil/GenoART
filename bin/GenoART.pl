@@ -5,9 +5,9 @@
 
 
 
-unless(scalar (@ARGV) == 4 )
+unless(scalar (@ARGV) >= 6 )
 {
-	print "Give the proper format: perl GenoART.pl 0/1/2_MC Enzyme_name input.fasta\n";
+	print "Give the proper format: perl GenoART.pl 0/1/2_MC Enzyme_name input.fasta genetic_code proteotypic_peptide_Length ProteinLength\n";
 	exit;
 }
 else
@@ -16,14 +16,18 @@ else
 	$cleavage=$ARGV[0];
 	$enzyme=$ARGV[1];
 	$genetic_code_tt = $ARGV[3];
+	$minProPepLength = $ARGV[4];
+	$minProteinLength = $ARGV[5];
+	$outputSuffixName = $ARGV[6];
 }
 
-$out_s2s=$out_gtf=$in_file=$infile;
+$out_m2s=$out_s2s=$out_gtf=$in_file=$infile;
 ($type)=(split /\./,$infile)[-1];
 $in_file=~s/\.$type/\_op\.$type/;
 
-$out_gtf=~s/\.$type/\_pep\.gtf/;
-$out_s2s=~s/\.$type/\_pep\.$type/;
+$out_gtf=~s/\.$type/\_pep\_custom\_$outputSuffixName\.gtf/;
+$out_s2s=~s/\.$type/\_pep\_custom\_$outputSuffixName\.$type/;
+$out_m2s=~s/\.$type/\_pep\_custom\_m2s\_$outputSuffixName\.$type/;
 
 open FILE, "$in_file" or die $!;
 open (GENETIC, "bin/genetic_code/$genetic_code_tt") or die $!;
@@ -56,7 +60,16 @@ $giaccession=0;
 #open (ALL, ">$out_fasta") or die $!;
 open (GTF, ">$out_gtf") or die $!;
 open (OUT, ">$out_s2s") or die $!;
+open (M2SOUT, ">$out_m2s") or die $!;
 #################################
+
+#Create FASTA file for sequence between stop to stop. 
+stop2stop(\%codon,\%seq_s2s,\%more);
+
+print "\nCreating 6/3 - frame database is complete\n\n";
+
+print "Creating custom GTF is in progress\n\n";
+
 while (($a,$b) = each %seq)  
 {
 	@sequence = split (//, $b);
@@ -68,7 +81,14 @@ while (($a,$b) = each %seq)
 		for ($i=$j; $i<= $seq_size; $i=$i+3) # take the three ltters and compare it with codon
 		{
 			$triplet = "$sequence[$i]"."$sequence[$i+1]"."$sequence[$i+2]"; #mergin the three letter for one codon
-			$protein .= "$codon{$triplet}"; # Fetch the amino acids for the above three letter
+			if (exists $codon{$triplet})
+			{
+				$protein .= "$codon{$triplet}"; # Fetch the amino acids for the above three letter if exists 
+			}
+			else
+			{
+					$protein .= "*"; # Insert star in place of amino acids where the above three letters are NNN or NNA or NNT or NNG or NNC or other combinations of xNx
+			}
 		}
 		$prt_len = length $protein; # taking the length of concatinated amino acids
 		$seq = $protein; #Storing the ptoeins in seq
@@ -154,7 +174,7 @@ while (($a,$b) = each %seq)
 				####################################################start fo coordinate fetcher
 				@pos=();
 				$seq_len = length ($var);
-				if ($seq_len >= 6)
+				if ($seq_len >= $minProPepLength)
 				#if ($seq_len >= 6 && $seq_len <= 35)
 				{
 					#print "-->$var\n";
@@ -179,7 +199,7 @@ while (($a,$b) = each %seq)
 						#if ($peptide_seq =~ /PVAMASYYEILDVPR/) { print " I am here: $peptide_seq\n";} 
 						$result=$start=$end=$junc_end=$genomic_start=$genomic_end=0; 
 						$seq_len = length($peptide_seq);
-						if ($seq_len >= 6)
+						if ($seq_len >= $minProPepLength)
 						{
 							#print "$peptide_seq\n";
 							$var = $peptide_seq;
@@ -277,8 +297,8 @@ while (($a,$b) = each %seq)
 									#print "behera\n";
 			#						print ALL ">gi\|10110$giaccession_1m\|ref|$a\| $a\#$strandis$count\#$coordis[0]\:$genomic_start\-$genomic_end\n";
 									$var_var = $var;
-		        		        	                $rev_var = reverse $var_var;
-		        #		        	                print ALL "$rev_var\n";
+		        		        	$rev_var = reverse $var_var;
+		        #		        	print ALL "$rev_var\n";
 									print GTF "$coordis[0]\t10110$giaccession_1m\tCDS\t$genomic_start\t$genomic_end\t\.\t$strandis\t\.\tgene_id \"$a\"\; transcript_id \"$rev_var\";\n";
 								}
 							}
@@ -473,7 +493,7 @@ while (($a,$b) = each %seq)
 	$mycount++;
 }
 #Create FASTA file for sequence between stop to stop. 
-stop2stop(\%codon,\%seq_s2s,\%more);
+#stop2stop(\%codon,\%seq_s2s,\%more);
 
 ############################################################################################################################
 
@@ -618,46 +638,61 @@ sub stop2stop{
 			{
 				$xs_len = length ($xs);
 				$sub_count++;
-				if ($xs_len >= 7)
+				if ($xs_len >= $minProteinLength)
 				{
-					$new_temp  =  $xs;
-					$new_temp =~ s/(K|R)/$1=/g;
-					$new_temp =~ s/=P/P/g;
-					$new_temp =~ s/(K|R)=/#/g;
-					$temp_v = 0; $char="#";$flag=0;
-					my $offset = 0;
-					my $result = index($new_temp, $char, $offset);#return the position of $char in $new_temp after at/after $offset i.e 0
-					if ($result != -1) # result = -1 when the $char didn't match $new_temp
-					{
-						while ($result != -1) #search until it matches #
+					$intlen = length ($intnum);
+					if ($intlen == 1) {$someGiNum = "1000000$intnum";}
+					if ($intlen == 2) {$someGiNum = "100000$intnum";}
+					if ($intlen == 3) {$someGiNum = "10000$intnum";}
+					if ($intlen == 4) {$someGiNum = "1000$intnum";}
+					if ($intlen == 5) {$someGiNum = "100$intnum";}
+					if ($intlen == 6) {$someGiNum = "10$intnum";}
+					if ($intlen == 7) {$someGiNum = "1$intnum";}
+					if ($xs =~ /M/)
+                    {
+						if ($xs =~ /^M/)
 						{
-							$new_v = $temp_v;
-							$temp_v = $result+1;
-							$diff = $temp_v-$new_v;
-							if ($diff >= 7) {$flag =1; }
-							$offset = $result + 1; #incrementing the offset i.e the starting of search
-							$result = index($new_temp, $char, $offset);
+							if (!exists $checkRedundancyMet{$xs})
+							{
+								$checkRedundancyMet{$xs}="";
+								print OUT ">gi|$someGiNum|ref|$a| \n$xs\n";#hash more to be taken #Date modified: 21/10/2018
+								print M2SOUT ">gi|$someGiNum|ref|$a| \n$xs\n";
+								$intnum++;
+							}
 						}
-						if ($flag ==1)
+						else
 						{
-							$intlen = length ($intnum);
-							if ($intlen == 1) {$someGiNum = "1000000$intnum";}
-							if ($intlen == 2) {$someGiNum = "100000$intnum";}
-							if ($intlen == 3) {$someGiNum = "10000$intnum";}
-							if ($intlen == 4) {$someGiNum = "1000$intnum";}
-							if ($intlen == 5) {$someGiNum = "100$intnum";}
-							if ($intlen == 6) {$someGiNum = "10$intnum";}
-							if ($intlen == 7) {$someGiNum = "1$intnum";}
-							
-							print OUT ">gi|$someGiNum|ref|$a| $a\#$more{$a}\#PF$count\_PC$sub_count\n$xs\n";#hash more to be taken
+							$NewMetSeq = $xs;
+							$NewMetSeq =~ s/M/\#M/;
+							@NewMets = split (/\#/, $NewMetSeq);
+							$theNewMString = $NewMets[-1];
+							if ($theNewMString >=$minProteinLength)
+							{
+								if (!exists $checkRedundancyMet{$xs})
+								{
+									$checkRedundancyMet{$xs}="";
+									print OUT ">gi|$someGiNum|ref|$a| \n$xs\n";#hash more to be taken #Date modified: 21/10/2018
+									print M2SOUT ">gi|$someGiNum|ref|$a| \n$xs\n";
+									$intnum++;
+								}
+							}
+						}
+                    }
+					else
+					{
+						if (!exists $checkRedundancy{$xs})
+						{
+							$checkRedundancy{$xs}="";
+							print OUT ">gi|$someGiNum|ref|$a| \n$xs\n";#hash more to be taken #Date modified: 21/10/2018
 							$intnum++;
-							$result=0;$diff=0;$new_v=0;
 						}
 					}
+					#print OUT ">gi|$someGiNum|ref|$a| \n$xs\n";#hash more to be taken #Date modified: 21/10/2018
+					#print OUT ">gi|$someGiNum|ref|$a| $a\#$more{$a}\#PF$count\_PC$sub_count\n$xs\n";#hash more to be taken
+					$result=0;$diff=0;$new_v=0;
 				}
 			}
 			$protein="";
 		}
 	}
-
 }
