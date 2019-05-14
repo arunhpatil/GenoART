@@ -641,15 +641,9 @@ sub stop2stop{
 				if ($xs_len >= $minProteinLength)
 				{
 					$intlen = length ($intnum);
-					if ($intlen == 1) {$someGiNum = "1000000$intnum";}
-					if ($intlen == 2) {$someGiNum = "100000$intnum";}
-					if ($intlen == 3) {$someGiNum = "10000$intnum";}
-					if ($intlen == 4) {$someGiNum = "1000$intnum";}
-					if ($intlen == 5) {$someGiNum = "100$intnum";}
-					if ($intlen == 6) {$someGiNum = "10$intnum";}
-					if ($intlen == 7) {$someGiNum = "1$intnum";}
+					$someGiNum = "10$intnum";
 					if ($xs =~ /M/)
-                    {
+                   	 		{
 						if ($xs =~ /^M/)
 						{
 							if (!exists $checkRedundancyMet{$xs})
@@ -677,7 +671,7 @@ sub stop2stop{
 								}
 							}
 						}
-                    }
+                    			}
 					else
 					{
 						if (!exists $checkRedundancy{$xs})
