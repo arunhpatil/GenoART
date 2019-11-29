@@ -240,15 +240,15 @@ hsa-let-7i-5p   7AwwRIBQ1       TGAGGTAGTAGTTTGTGCTGTTT None    None    6.0     
 11/29/2019 03:43:21 INFO It took 0.000 minutes
 ```
 * variant: Specify the query with one or more variant types 
-	iso_5p                  - indicates the shift at the reference 5' miRNA
-	iso_3p                  - indicates the shift at the reference 3' miRNA
-	iso_add3p               - Number of non-template nucleotides added at 3p
-	iso_add5p               - Number of non-template nucleotides added at 5p
-	iso_snv_seed            - when affected nucleotides are between [2-7]
-	iso_snv_central_offset  - when affected nucleotides is at position [8]
-	iso_snv_central         - when affected nucleotides are between [9-12]
-	iso_snv_central_supp    - when affected nucleotides are between [13-17]
-	iso_snv                 - anything else
+	* iso_5p                  - indicates the shift at the reference 5' miRNA
+	* iso_3p                  - indicates the shift at the reference 3' miRNA
+	* iso_add3p               - Number of non-template nucleotides added at 3p
+	* iso_add5p               - Number of non-template nucleotides added at 5p
+	* iso_snv_seed            - when affected nucleotides are between [2-7]
+	* iso_snv_central_offset  - when affected nucleotides is at position [8]
+	* iso_snv_central         - when affected nucleotides are between [9-12]
+	* iso_snv_central_supp    - when affected nucleotides are between [13-17]
+	* iso_snv                 - anything else
 
 ```
 ```
