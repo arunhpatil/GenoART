@@ -293,7 +293,7 @@ hsa-let-7i-5p   7AwwRIBU1       TGAGGTAGTAGTTTGTGCTGTTC None    None    6.0     
 hsa-let-7i-5p   7AwwRIBQ1       TGAGGTAGTAGTTTGTGCTGTTT None    None    6.0     28.0
 11/29/2019 03:43:21 INFO It took 0.000 minutes
 ```
-* variant: Specify the query with one or more variant types. The following variant types can be queried using `-var` argument.
+* variant: Specify the query with one or more variant types. The following variant types can be queried using `-var` argument. 
 
   * iso_5p                  - indicates the shift at the reference 5' miRNA
   * iso_3p                  - indicates the shift at the reference 3' miRNA
@@ -306,7 +306,6 @@ hsa-let-7i-5p   7AwwRIBQ1       TGAGGTAGTAGTTTGTGCTGTTT None    None    6.0     
   * iso_snv                 - anything else
 
 The conventional query for selecting rows with TRUE values of iso_5p, iso_3p and iso_snv_central_offset would be as "SELECT * FROM data_sets WHERE iso_5p!="None" AND iso_3p!="None" AND iso_snv_central_offset!=0".  In `mirtop sql` we can specifiy the same as shown in the example. 
-
 
 ```
 mirtop sql -q --db examples/annotate/query_sample.db -e select -var iso_5p,iso_3p,iso_snv_central_offset -l 5
@@ -321,6 +320,80 @@ hsa-miR-6809-5p miRBase22       isomiR  8.0     25.0    .       +       .       
 hsa-miR-6727-5p miRBase22       isomiR  8.0     24.0    .       +       .       hMGGDx1 AGGGGCCGGCGGCAGCC       hsa-miR-6727-5p hsa-mir-6727    iso_snv_central_offset,iso_5p:-2,iso_3p:-4      -2.0 -4.0    None    None    0.0     0.0     0.0     1.0     0.0     miRBase22       A5MC6MAMCC      None    None    None    Pass    None    1
 hsa-let-7f-5p   miRBase22       isomiR  8.0     27.0    .       +       .       .       NAGGTAGTAGATTGTATAGT    hsa-let-7f-5p   hsa-let-7f-1    iso_snv_central_offset,iso_5p:-1,iso_3p:-1      -1.0 -1.0    None    None    0.0     0.0     0.0     1.0     0.0     miRBase22       N19M    None    None    None    Pass    None    1
 12/02/2019 11:52:39 INFO It took 0.001 minutes
+```
+* filter: Filter attribute lets to choose data query such that the attribute is 'Pass' for the reads from the miRNA sequencing is OK; 'Reject' if the reads are false positive; 'Reject lowcount'where the miRNA is rejected due to low count in data. This filter decission is made by the aligner tools and is supplied to the GFF3. 
+
+
+```
+mirtop sql -q --db examples/annotate/query_sample.db -e select -var iso_5p,iso_3p,iso_snv_central_offset -l 5 -f Pass
+```
+OUTPUT:
+```
+seqID   source_file     type    start   end     score   strand  phase   UID     Read    Name    Parent  Variant iso_5p  iso_3p  iso_add3p       iso_add5p       iso_snv iso_snv_seed    iso_snv_central      iso_snv_central_offset  iso_snv_central_supp    source  cigar   hits    alias   genomic_pos     filter  seed_fam        SRR333680_1
+hsa-miR-6727-5p miRBase22       isomiR  8.0     26.0    .       +       .       uMcGq6v2        TGGGGCAAGCGGCTGGCTC     hsa-miR-6727-5p hsa-mir-6727    iso_snv_central_offset,iso_5p:-2,iso_3p:-2   -2.0    -2.0    None    None    0.0     0.0     0.0     1.0     0.0     miRBase22       T6MA8MCTC       None    None    None    Pass    None    1
+hsa-miR-6809-5p miRBase22       isomiR  8.0     25.0    .       +       .       xh@L$4  CCAAGGAAATAAGGGGAG      hsa-miR-6809-5p hsa-mir-6809    iso_snv_central_offset,iso_5p:-2,iso_3p:-2      -2.0 -2.0    None    None    0.0     0.0     0.0     1.0     0.0     miRBase22       C8MT3MG3MG      None    None    None    Pass    None    1
+hsa-miR-6727-5p miRBase22       isomiR  8.0     24.0    .       +       .       hMGGDx1 AGGGGCCGGCGGCAGCC       hsa-miR-6727-5p hsa-mir-6727    iso_snv_central_offset,iso_5p:-2,iso_3p:-4      -2.0 -4.0    None    None    0.0     0.0     0.0     1.0     0.0     miRBase22       A5MC6MAMCC      None    None    None    Pass    None    1
+hsa-let-7f-5p   miRBase22       isomiR  8.0     27.0    .       +       .       .       NAGGTAGTAGATTGTATAGT    hsa-let-7f-5p   hsa-let-7f-1    iso_snv_central_offset,iso_5p:-1,iso_3p:-1      -1.0 -1.0    None    None    0.0     0.0     0.0     1.0     0.0     miRBase22       N19M    None    None    None    Pass    None    1
+12/02/2019 12:33:28 INFO It took 0.001 minutes
+```
+* count: Count is used to retrieve summary for a custom query. Generally, `select * from data_sets` or `select columns from data_sets` is used to retrieve the information and a WHERE clause is optionally supplied such as `--variants \| --miRNA` etc. This can be leveraged to get the count for a specific query, such that the query `select count(*) from data_sets` or `select count(columns) from data_sets` will be executed along with any optional WHERE clause. Argument `-n T` where T is True else False (Default False).
+
+For example: 
+1) How many miRNA isoforms exists for a variant type iso_snv_central_offset and iso_5p 
+2) How many miRNA isoforms exists for a variant type iso_5p and iso_3p 
+3) How many miRNA isoforms exists for a variant type iso_5p and iso_3p for miRNA hsa-miR-142-5p and hsa-miR-372-3p
+
+Query in that order of example is below: 
+```
+mirtop sql -q --db examples/annotate/query_sample.db -e select -var iso_5p,iso_snv_central_offset -f Pass -n T
+mirtop sql -q --db examples/annotate/query_sample.db -e select -var iso_5p,iso_3p -f Pass -n T
+mirtop sql -q --db examples/annotate/query_sample.db -e select -var iso_5p,iso_3p -f Pass -l 30 -miR hsa-miR-142-5p,hsa-miR-372-3p -n T
+```
+
+OUTPUT: 
+
+Example 1: 
+
+```
+12/02/2019 01:00:03 INFO Run Convert GFF.
+COUNT(*)
+Unique counts for all rows is: 10
+12/02/2019 01:00:03 INFO It took 0.000 minutes
+
+```
+
+Example 2: 
+
+```
+12/02/2019 01:01:59 INFO Run Convert GFF.
+COUNT(*)
+Unique counts for all rows is: 751
+12/02/2019 01:01:59 INFO It took 0.000 minutes
+```
+
+Example 3: 
+
+```
+12/02/2019 01:02:40 INFO Run Convert GFF.
+COUNT(*)
+1. hsa-miR-142-5p:      28
+2. hsa-miR-372-3p:      46
+12/02/2019 01:02:40 INFO It took 0.000 minutes
+```
+
+* txtout: Specify the query to redirect the output to a file instead of printing it on the screen. The name of the file must have an extension of (.txt). 
+
+Extending from our previous example (3): How many miRNA isoforms exists for a variant type iso_5p and iso_3p for miRNA hsa-miR-142-5p and hsa-miR-372-3p and redirect the output to sample_count.txt
+```
+mirtop sql -q --db examples/annotate/query_sample.db -e select -var iso_5p,iso_3p -f Pass -l 30 -miR hsa-miR-142-5p,hsa-miR-372-3p -n T -txto sample_count.txt
+```
+OUTPUT:
+```
+12/02/2019 01:10:06 INFO Run Convert GFF.
+
+Writing data to file: sample_count.txt
+
+12/02/2019 01:10:06 INFO It took 0.000 minutes
 ```
 
 
