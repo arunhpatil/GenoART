@@ -7,6 +7,60 @@ The `mirtop sql` package allows users to create and query a SQLite database usin
 
 Use `mirtop sql -h` to display help information
 
+```
+mirtop sql -h
+```
+SQL arguments:
+```
+['sql', '-h']
+usage: mirtop sql [-h] [--db] (-c | -q) [--gff] [-o] [-t] [-txto] [-col] [-n]
+                  [-miR] [-var] [-f] [-l] [-e] [-d] [-vd]
+
+optional arguments:
+  -h, --help          show this help message and exit
+  --db                SQL Database name. (default: mirtop.db)
+  -c, --create        Creates a SQLite database from GFF
+  -q, --query         Query from a SQLite database
+  -d, --debug         max verbosity mode
+  -vd, --print_debug  print debug messages on terminal
+
+SQL create usage mode:
+  --gff               GFF file with precursor and mature position to genome
+  -o , --out          Directory of output files
+
+SQL query usage mode:
+  -t , --table        Specify table name to use
+  -txto , --txtout    Writes the output of the query to a file speficied. Format (-fmt) is a tab-delimited text file by default
+  -col , --columns    Select specific columns from the table to display (Default: all columns), or use with -n option to return n-counts. For information of the available columns see 'show-schema' or 'show-columns'. NOTE: options -e select must be applied!.
+  -n , --count        Returns 'n' counts for the query. Options 'T' for True, if not 'F' (Default: -n F). NOTE: options -e select must be applied! and accepts only one column from -col option.
+  -miR , --miRNA      Specify the miRNA names to query. For multiple miRNAs use comma(,) as separator; or text file (.txt) separated with new line character
+  -var , --variant    Specify one or more types of variants to query. Use comma(,) as separator
+                          Choices supports the following:
+                              iso_5p                  - indicates the shift at the reference 5' miRNA
+                              iso_3p                  - indicates the shift at the reference 3' miRNA
+                              iso_add3p               - Number of non-template nucleotides added at 3p
+                              iso_add5p               - Number of non-template nucleotides added at 5p
+                              iso_snv_seed            - when affected nucleotides are between [2-7]
+                              iso_snv_central_offset  - when affected nucleotides is at position [8]
+                              iso_snv_central         - when affected nucleotides are between [9-12]
+                              iso_snv_central_supp    - when affected nucleotides are between [13-17]
+                              iso_snv                 - anything else
+
+  -f , --filter       Specify Filter tag attribute. Options: Pass, Reject. (Default: None)
+  -l , --limit        Specify the number of rows to output. (Example: --limit 30, to limit the first 30 rows)
+  -e , --expr         Expression is the query that you want to run; (-e "<statement>")
+                          Choices supports the following:
+                             show-tables              - Displays tables in the database (default: mirtop.db)
+                             show-schema              - Displays the table schema (requires -t)
+                             show-columns             - Displays available columns in the table
+                             describe-gff             - Prints out the header information from the GFF file
+                             isomirs-per-mirna        - Displays the count of isomiRs for miRNA (requires -miR)
+                             select                   - Allows specific query construction.
+                                                        Example: mirtop sql --db tmp_mirtop/SRR333680_revised2.db -qe select -var iso_5p,iso_3p -miR hsa-let-7a-5p,hsa-let-7d-5p -l 30
+                                                        The above expression evaluates to selecting miRNAs in -miR with variants in -var and prints out first 30 rows in --limit
+
+
+```
 ## Creating Database 
 
 The `mirtop sql -c` takes `--gff` gff3 file and creates a database with name `--db` 
@@ -226,7 +280,7 @@ hsa-let-7i-5p   7AwwRIB71       TGAGGTAGTAGTTTGTGCTGTTG None    1.0     6.0     
 ``` 
 * miRNA: Specify one or more miRNA to query. 
 
-The user can specify miRNAs to query from the database. Use comma (miRNA-1,NO-SPACES,miRNA-n) to separate miRNAs while passing as an argument. For large set of query miRNAs use a text-file as input, separated by new line charactor. 
+The user can specify miRNAs to query from the database. Use comma (miRNA-1,NO-SPACES,miRNA-n) to separate miRNAs while passing as an argument. For large set of query miRNAs use a text-file as input, separated by new line character. 
 ``` 
 mirtop sql -q --db examples/annotate/query_sample.db -e select -l 4 -col seqID,UID,Read,iso_5p,iso_3p,start,end -miR hsa-let-7i-5p
 ```
@@ -239,7 +293,9 @@ hsa-let-7i-5p   7AwwRIBU1       TGAGGTAGTAGTTTGTGCTGTTC None    None    6.0     
 hsa-let-7i-5p   7AwwRIBQ1       TGAGGTAGTAGTTTGTGCTGTTT None    None    6.0     28.0
 11/29/2019 03:43:21 INFO It took 0.000 minutes
 ```
-* variant: Specify the query with one or more variant types 
+* variant: Specify the query with one or more variant types.
+
+The following variant types can be queried using `-var` argument. The conventional query for selecting rows with TRUE values of iso_5p, iso_3p and iso_snv_central_offset would be as "SELECT * FROM data_sets WHERE iso_5p!="None" AND iso_3p!="None" AND iso_snv_central_offset!=0".  In `mirtop sql` we can specifiy the same as shown in the example. 
 	* iso_5p                  - indicates the shift at the reference 5' miRNA
 	* iso_3p                  - indicates the shift at the reference 3' miRNA
 	* iso_add3p               - Number of non-template nucleotides added at 3p
@@ -251,13 +307,19 @@ hsa-let-7i-5p   7AwwRIBQ1       TGAGGTAGTAGTTTGTGCTGTTT None    None    6.0     
 	* iso_snv                 - anything else
 
 ```
+mirtop sql -q --db examples/annotate/query_sample.db -e select -var iso_5p,iso_3p,iso_snv_central_offset -l 5
 ```
 
+OUTPUT:
+```
+12/02/2019 11:52:39 INFO Run Convert GFF.
+seqID   source_file     type    start   end     score   strand  phase   UID     Read    Name    Parent  Variant iso_5p  iso_3p  iso_add3p       iso_add5p       iso_snv iso_snv_seed    iso_snv_central      iso_snv_central_offset  iso_snv_central_supp    source  cigar   hits    alias   genomic_pos     filter  seed_fam        SRR333680_1
+hsa-miR-6727-5p miRBase22       isomiR  8.0     26.0    .       +       .       uMcGq6v2        TGGGGCAAGCGGCTGGCTC     hsa-miR-6727-5p hsa-mir-6727    iso_snv_central_offset,iso_5p:-2,iso_3p:-2   -2.0    -2.0    None    None    0.0     0.0     0.0     1.0     0.0     miRBase22       T6MA8MCTC       None    None    None    Pass    None    1
+hsa-miR-6809-5p miRBase22       isomiR  8.0     25.0    .       +       .       xh@L$4  CCAAGGAAATAAGGGGAG      hsa-miR-6809-5p hsa-mir-6809    iso_snv_central_offset,iso_5p:-2,iso_3p:-2      -2.0 -2.0    None    None    0.0     0.0     0.0     1.0     0.0     miRBase22       C8MT3MG3MG      None    None    None    Pass    None    1
+hsa-miR-6727-5p miRBase22       isomiR  8.0     24.0    .       +       .       hMGGDx1 AGGGGCCGGCGGCAGCC       hsa-miR-6727-5p hsa-mir-6727    iso_snv_central_offset,iso_5p:-2,iso_3p:-4      -2.0 -4.0    None    None    0.0     0.0     0.0     1.0     0.0     miRBase22       A5MC6MAMCC      None    None    None    Pass    None    1
+hsa-let-7f-5p   miRBase22       isomiR  8.0     27.0    .       +       .       .       NAGGTAGTAGATTGTATAGT    hsa-let-7f-5p   hsa-let-7f-1    iso_snv_central_offset,iso_5p:-1,iso_3p:-1      -1.0 -1.0    None    None    0.0     0.0     0.0     1.0     0.0     miRBase22       N19M    None    None    None    Pass    None    1
+12/02/2019 11:52:39 INFO It took 0.001 minutes
+```
 
-
-
-
-
-miRNA annotation generated from [miraligner](https://github.com/lpantano/seqbuster) tool:
 
 
