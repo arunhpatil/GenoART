@@ -296,15 +296,15 @@ hsa-let-7i-5p   7AwwRIBQ1       TGAGGTAGTAGTTTGTGCTGTTT None    None    6.0     
 * variant: Specify the query with one or more variant types.
 
 The following variant types can be queried using `-var` argument. The conventional query for selecting rows with TRUE values of iso_5p, iso_3p and iso_snv_central_offset would be as "SELECT * FROM data_sets WHERE iso_5p!="None" AND iso_3p!="None" AND iso_snv_central_offset!=0".  In `mirtop sql` we can specifiy the same as shown in the example. 
-  * iso_5p                  - indicates the shift at the reference 5' miRNA
-  * iso_3p                  - indicates the shift at the reference 3' miRNA
-  * iso_add3p               - Number of non-template nucleotides added at 3p
-  * iso_add5p               - Number of non-template nucleotides added at 5p
-  * iso_snv_seed            - when affected nucleotides are between [2-7]
-  * iso_snv_central_offset  - when affected nucleotides is at position [8]
-  * iso_snv_central         - when affected nucleotides are between [9-12]
-  * iso_snv_central_supp    - when affected nucleotides are between [13-17]
-  * iso_snv                 - anything else
+  - iso_5p                  - indicates the shift at the reference 5' miRNA
+  - iso_3p                  - indicates the shift at the reference 3' miRNA
+  - iso_add3p               - Number of non-template nucleotides added at 3p
+  - iso_add5p               - Number of non-template nucleotides added at 5p
+  - iso_snv_seed            - when affected nucleotides are between [2-7]
+  - iso_snv_central_offset  - when affected nucleotides is at position [8]
+  - iso_snv_central         - when affected nucleotides are between [9-12]
+  - iso_snv_central_supp    - when affected nucleotides are between [13-17]
+  - iso_snv                 - anything else
 
 ```
 mirtop sql -q --db examples/annotate/query_sample.db -e select -var iso_5p,iso_3p,iso_snv_central_offset -l 5
