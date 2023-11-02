@@ -12,6 +12,6 @@
   "author": "Arun H. Patil <arun26feb@gmail.com>",
   "license": "MIT",
   "dependencies": {
-    "electron": "^1.8.7"
+    "electron": "^22.3.25"
   }
 }
